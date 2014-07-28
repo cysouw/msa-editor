@@ -540,7 +540,9 @@ var tableSelection = (function () {
 
     function getCellInTable(x, y) {
         var body = document.getElementById('msa_body');
-        return body.children[y].children[x];
+        var row = body.children[y];
+        if (row === undefined) return undefined;
+        return row.children[x];
     }
 
     function clearSelection() {
