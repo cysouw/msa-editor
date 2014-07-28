@@ -1050,8 +1050,29 @@ function splitString(s) {
     return result;
 }
 
+function checkDependencies() {
+    result = '';
+    if (window.UndoManager === undefined)
+        result += 'Loading of UndoManager failed.\n';
+    if (window.saveAs === undefined)
+        result += 'Loading of FileSaver failed.\n';
+    if (window.jQuery === undefined)
+        result += 'Loading of JQuery failed.\n';
+    else if (window.jQuery.ui === undefined)
+        result += 'Loading of JQueryUI failed.\n';
+    if (result !== '')
+        result += '\nThe application will not work as intended. Did you run fetch-dependencies.sh?' 
+    return result
+}
+
 //initialisation
 window.onload = function() {
+    //check if all dependencies are loaded:
+    errMsg = checkDependencies();
+    if (errMsg !== '') {
+        alert(errMsg);
+    }
+
     undoManager = new UndoManager();
     undoManager.setCallback(undoManagerChanged);
     undoManagerChanged();
