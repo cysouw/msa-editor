@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <link rel="stylesheet" href="css/lib/jquery-ui-1.11.0-smoothness.css" type="text/css">
+    <link rel="stylesheet" href="css/msa-editor.css" type="text/css">
+
+    <script type="text/javascript" src="js/lib/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="js/lib/jquery-ui-1.11.0.js"></script>
+    <script type="text/javascript" src="js/lib/FileSaver.js"></script>
+    <script type="text/javascript" src="js/lib/undomanager.js"></script>
+    <script type="text/javascript" src="js/dolgo.js"></script>
+    <script type="text/javascript" src="js/msa-editor.js"></script>
+  </head>
+  <body>
+  <h3>MSA Editor</h3>
+  <!--<label for="file" id="Selector">Browse an MSA file: </label>-->
+  <input type="file" id="file" name="file" multiple accept=".msa"
+	 onchange="fileManager.handleFiles(this.files)" class="submit2 active"
+	 />
+  <select id="msa_select" style='display: none' onchange="fileManager.handleFileSelect(this)"></select>
+  <input id="view" type="button" onclick="fileManager.showSelectedFile(false)" class="submit inactive" value="&nbsp;VIEW&nbsp;" />
+  <input id='edit' type="button" onclick="fileManager.showSelectedFile(true)" class="submit inactive" value="&nbsp;EDIT&nbsp;" />
+  <input id="reload" type="button"
+	 onclick="fileManager.reload(true)" class="submit inactive"
+	 value="&nbsp;RELOAD&nbsp;" />
+  <input id="minimize" type="button"
+	 onclick="executeOperation(removeGapColumnsForActive)" class="submit inactive"
+	 value="&nbsp;MINIMIZE&nbsp;" />
+  <input id="save" type="button" onclick="fileManager.saveFiles()" class="submit inactive" value="&nbsp;SAVE&nbsp;" />
+  <input id="undo_button" type="button" style='display: none' onclick="undoManager.undo();" class="submit active" value="&nbsp;UNDO&nbsp;" />
+  <input id="redo_button" type="button" style='display: none' onclick="undoManager.redo();" class="submit active" value="&nbsp;REDO&nbsp;" />
+
+  <br><br>
+  <table id="msa_table">
+    <thead id="msa_head"></thead>
+    <tbody id="msa_body"></tbody>
+  </table>
+
+  <div id="reload_dialog" title="Reload MSA file?" style='display: none'>
+    <p>There are unsaved changes to this file.<br>
+      Do you still want to reload the file?
+  </div>
+
+  <div id="cell_edit_dialog" title="Edit Cell" style='display: none'>
+    <input type="text" name="cell_content" id="cell_content" class="text ui-widget-content ui-corner-all">
+  </div>
+
+  </body>
+</html>

@@ -1,0 +1,141 @@
+#msa {
+  background-color: white;
+}
+
+#store {
+  display: none;
+}
+
+.residue {
+  display: table-cell;
+  width: 50px;
+  background-color: #f1f1f1;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
+.residue_show {
+  display: table-cell;
+  width: 50px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.new_gap {
+  display: table-cell;
+  width: 50px;
+  background-color: #f1f1f1;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  cursor: move;
+}
+
+table {
+    border-spacing: 0px;
+}
+
+td {
+  border: 2px solid transparent;
+}
+
+td:focus {
+  border: 2px solid red !important;
+}
+
+td.selected-left {
+  border-left: 2px solid #cc0000;
+}
+
+td.selected-right {
+  border-right: 2px solid #cc0000;
+}
+
+td.selected-top {
+  border-top: 2px solid #cc0000;
+}
+
+td.selected-bottom {
+  border-bottom: 2px solid #cc0000;
+}
+
+td.active {
+  border: 2px solid red;
+}
+
+.active {
+  background-color: LightBlue;
+  cursor: pointer;
+  display: inline;
+}
+
+.inactive {
+  background-color: LightGray;
+  cursor: default;
+  display: none;
+}
+
+.taxon {
+  display: table-cell;
+  font-weight: bold;
+  text-align: left;
+  background-color: white;
+}
+.header {
+  font-weight: bold;
+  text-align: left;
+  background-color: LightBlue;
+}
+.submit {
+  border: 1px solid black;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+.submit2 {
+  border: 1px solid black;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 2px;
+  padding-left: 2px;
+}
+.annotation {
+  background-color: LightGray;
+  text-align: center;
+  color: DarkGray;
+}
+.annotation_type {
+  background-color: LightGray;
+  text-align: left;
+  color:DarkGray;
+}
+#source {
+  background-color: LightGray;
+  width: 600px;
+  height: 300px;
+}
+  
+
+td.dolgo_ERROR{background-color: white; color:red;}
+td.dolgo_V{background-color: #c89696;}
+td.dolgo_K{background-color: #c8af96;} 
+td.dolgo_P{background-color: #c8c864;} 
+td.dolgo_H{background-color: #96c8b0;} 
+td.dolgo_J{background-color: #96c896;} 
+td.dolgo_M{background-color: #96c8af;} 
+td.dolgo_N{background-color: #96c8c8;} 
+td.dolgo_S{background-color: #96c8c8;} 
+td.dolgo_R{background-color: #96c8c3;} 
+td.dolgo_T{background-color: #af96c8;} 
+td.dolgo_W{background-color: #c864c8;} 
+td.dolgo_1{background-color: #c896af;} 
+td.dolgo_X{background-color: #cccccc;}
+td.dolgo_GAP{background-color: #cccccc;}
+        
+.ui-widget-overlay
+{
+    background: #000;
+    opacity: .6;
+}
