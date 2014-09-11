@@ -10,7 +10,8 @@ files on you hard disk.
 ## Installation
 After cloning the repository you have to fetch the required
 dependencies. Under Linux or OSX you can simply run the script
-`fetch-dependencies.sh` in a terminal window. 
+`fetch-dependencies.sh` in a terminal window. Under Windows execute
+`fetch-dependencies.bat`.
 
 ## Compatibility notes
 We target modern browsers on desktop operating systems, where *modern* means
