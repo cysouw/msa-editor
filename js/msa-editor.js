@@ -483,6 +483,7 @@ function showMSA(msa_file, edit_mode) {
         text += '<tr class="alm_row"><td class="taxon">' + row.row_header + '</td>';
         for (var col_idx = 0; col_idx < alignment.length; col_idx++) {
             var cell = alignment[col_idx];
+            if (cell === '') cell = '&nbsp;' //make sure a textNode gets allways created as a child of table data node
             var dolgo = row.getDolgo(cell);
             var tab_definition;
             if (edit_mode) {
