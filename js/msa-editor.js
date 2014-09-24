@@ -385,9 +385,7 @@ function parseMSA(msa_file) {
             msa_file.width = Math.max(msa_file.width, row.alignment.length);
         }
     }
-
-    msa_file.rows.sort(function(a,b) { return a.row_header.localeCompare(b.row_header); });
-            
+           
     //search duplicates
     var seen = {};
     for (var i = 0; i < msa_file.rows.length; i++) {
