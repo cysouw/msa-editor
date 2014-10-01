@@ -162,3 +162,10 @@ td.dolgo_GAP{background-color: #cccccc;}
     background: #000;
     opacity: .6;
 }
+
+.floating-header {
+  position: fixed;
+  top: 0;
+  visibility: hidden;
+  background: white;
+}

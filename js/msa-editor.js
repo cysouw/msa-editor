@@ -439,6 +439,7 @@ function syncMsaToDom(msa_file) {
     for(var row_idx=0; row_idx < rows.length; row_idx++) {
         tab_index = rows[row_idx].syncRowToDom(tbody.children[row_idx], tab_index);
     }
+    cloneTableHeaders();
 }
 
 //completely rebuild DOM table for the given msa_file
@@ -480,7 +481,13 @@ function showMSA(msa_file, edit_mode) {
     for (var row_idx = 0; row_idx < rows.length; row_idx++) {
         var row = rows[row_idx];
         var alignment = row.alignment;
-        text += '<tr class="alm_row"><td class="taxon">' + row.row_header + '</td>';
+        var row_class;
+        if (row instanceof AnnotationRow) {
+            row_class = 'ann_row'
+        } else {
+            row_class = 'alm_row'
+        }
+        text += '<tr class="' + row_class + '"><td class="taxon">' + row.row_header + '</td>';
         for (var col_idx = 0; col_idx < alignment.length; col_idx++) {
             var cell = alignment[col_idx];
             if (cell === '') cell = '&nbsp;' //make sure a textNode gets allways created as a child of table data node
@@ -510,6 +517,7 @@ function showMSA(msa_file, edit_mode) {
     document.getElementById('edit').disabled = edit_mode;
     document.getElementById('minimize').style.display = (edit_mode && 'inline' || 'none');
     if (edit_mode) tableSelection.initializeSelection();
+    cloneTableHeaders();
 }
 
 var tableSelection = (function () {
@@ -600,6 +608,7 @@ var tableSelection = (function () {
         y = selectionStart.y === ul.y && lr.y || ul.y;
         node = getCellInTable(x, y);
         node === undefined || node.focus();
+        updateTableHeaders();
     }
 
     function initializeSelection() {
@@ -1070,6 +1079,54 @@ function showHelpWindow() {
     $("#help_window").dialog("open");
 }
 
+
+//sticky table headers
+function updateTableHeaders() {
+    var tbody = document.getElementById('msa_body');
+    var sticky_table =  document.getElementById('msa_sticky_header_table');
+    var offset = $(tbody).offset();
+    var scroll_top = window.scrollY;
+    if (scroll_top > offset.top && scroll_top < offset.top+$(tbody).height()) {
+        sticky_table.style.visibility = 'visible';
+    } else {
+        sticky_table.style.visibility = 'hidden';
+    }
+
+    var active = document.activeElement;
+    if (active === undefined || active.tagName !== "TD")
+        return;
+    offset = $(active).offset();
+    if (offset.top < $(sticky_table).height() + scroll_top) {
+        window.scrollBy(0, offset.top - $(sticky_table).height() - scroll_top - 10);
+    }
+}
+
+function cloneTableHeaders() {
+    var sticky_table = document.getElementById('msa_sticky_header_table');
+    sticky_table.style.visibility = 'hidden';
+    var sticky_body = document.getElementById('msa_sticky_header_body');
+    $(sticky_body).empty();
+    var tbody = document.getElementById('msa_body');
+    var table = tbody.parentElement;
+    sticky_table.style.width = $(table).width() + 'px';
+    for (var index = 0; index < tbody.children.length; index++) {
+        var tr = tbody.children[index];
+        if (tr.classList.contains('ann_row')) {
+            var cloned_row = tr.cloneNode(true);
+            sticky_body.appendChild(cloned_row);
+            for(var cell_index=0; cell_index < cloned_row.children.length; cell_index++) {
+                var cell = cloned_row.children[cell_index];
+                cell.removeAttribute('tabIndex')
+                cell.classList.remove('selected-left');
+                cell.classList.remove('selected-right');
+                cell.classList.remove('selected-top');
+                cell.classList.remove('selected-bottom');
+            }
+        }
+    }
+}
+
+
 //initialisation
 window.onload = function() {
     //check if all dependencies are loaded:
@@ -1115,10 +1172,14 @@ window.onload = function() {
     });
 
     $( "#help_window" ).dialog({
-        autoOpen: true,
+        autoOpen: false,
         modal: true,
         width: '80ex',
         height: 'auto'
     });
-    
+
+    //sticky table header
+    $(window)
+        .scroll(updateTableHeaders)
+        .trigger("scroll");    
 }
