@@ -716,6 +716,8 @@ var tableSelection = (function () {
                 } else {
                     startSelection(nx, ny);
                 }
+            } else {
+                return true;
             }
             return false;
         },
