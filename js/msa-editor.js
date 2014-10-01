@@ -1066,6 +1066,10 @@ function checkDependencies() {
     return result
 }
 
+function showHelpWindow() {
+    $("#help_window").dialog("open");
+}
+
 //initialisation
 window.onload = function() {
     //check if all dependencies are loaded:
@@ -1108,6 +1112,13 @@ window.onload = function() {
                 $( this ).dialog( "close" );
             }
         },
+    });
+
+    $( "#help_window" ).dialog({
+        autoOpen: true,
+        modal: true,
+        width: '80ex',
+        height: 'auto'
     });
     
 }

@@ -36,6 +36,29 @@ table {
     border-spacing: 0px;
 }
 
+table.helptable {
+    margin: 1em 0px;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    background-color: #F9F9F9;
+    border: 1px solid #AAA;
+    color: #000;
+}
+
+table.helptable td {
+    border: 1px solid #AAA;
+    padding: 2px 0.75ex 2px;
+}
+
+table.helptable td.center {
+    text-align: center;
+}
+
+table.helptable th {
+    border: 1px solid #AAA;
+    padding: 2px 0.75ex;
+}
+
 td {
   border: 2px solid transparent;
 }
