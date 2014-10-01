@@ -608,7 +608,7 @@ var tableSelection = (function () {
         y = selectionStart.y === ul.y && lr.y || ul.y;
         node = getCellInTable(x, y);
         node === undefined || node.focus();
-        updateTableHeaders();
+        keepActiveNodeVisible();
     }
 
     function initializeSelection() {
@@ -1081,28 +1081,7 @@ function showHelpWindow() {
     $("#help_window").dialog("open");
 }
 
-
 //sticky table headers
-function updateTableHeaders() {
-    var tbody = document.getElementById('msa_body');
-    var sticky_table =  document.getElementById('msa_sticky_header_table');
-    var offset = $(tbody).offset();
-    var scroll_top = window.scrollY;
-    if (scroll_top > offset.top && scroll_top < offset.top+$(tbody).height()) {
-        sticky_table.style.visibility = 'visible';
-    } else {
-        sticky_table.style.visibility = 'hidden';
-    }
-
-    var active = document.activeElement;
-    if (active === undefined || active.tagName !== "TD")
-        return;
-    offset = $(active).offset();
-    if (offset.top < $(sticky_table).height() + scroll_top) {
-        window.scrollBy(0, offset.top - $(sticky_table).height() - scroll_top - 10);
-    }
-}
-
 function cloneTableHeaders() {
     var sticky_table = document.getElementById('msa_sticky_header_table');
     sticky_table.style.visibility = 'hidden';
@@ -1125,6 +1104,32 @@ function cloneTableHeaders() {
                 cell.classList.remove('selected-bottom');
             }
         }
+    }
+    updateTableHeaders();
+}
+
+function updateTableHeaders() {
+    var tbody = document.getElementById('msa_body');
+    var sticky_table =  document.getElementById('msa_sticky_header_table');
+    var offset = $(tbody).offset();
+    var scroll_top = window.scrollY;
+    if (scroll_top > offset.top && scroll_top < offset.top+$(tbody).height()) {
+        sticky_table.style.visibility = 'visible';
+    } else {
+        sticky_table.style.visibility = 'hidden';
+    }
+}
+
+function keepActiveNodeVisible() {
+    var active = document.activeElement;
+    if (active === undefined || active.tagName !== "TD")
+        return;
+
+    var sticky_table =  document.getElementById('msa_sticky_header_table');
+    var scroll_top = window.scrollY;
+    var offset = $(active).offset();
+    if (offset.top < $(sticky_table).height() + scroll_top) {
+        window.scrollBy(0, offset.top - $(sticky_table).height() - scroll_top - 10);
     }
 }
 
