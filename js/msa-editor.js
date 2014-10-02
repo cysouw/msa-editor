@@ -1097,6 +1097,7 @@ function cloneTableHeaders() {
             sticky_body.appendChild(cloned_row);
             for(var cell_index=0; cell_index < cloned_row.children.length; cell_index++) {
                 var cell = cloned_row.children[cell_index];
+                cell.style.width = $(tr.children[cell_index]).width() + 'px';
                 cell.removeAttribute('tabIndex')
                 cell.classList.remove('selected-left');
                 cell.classList.remove('selected-right');
