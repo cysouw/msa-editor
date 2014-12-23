@@ -5,7 +5,7 @@ A HTML editor for MSA files containing phonetic alignments.
 
 This is an HTML application to modify existing MSA files without requiring a
 Web server. You can simply open `msa-editor.html` in a browser and edit MSA
-files on you hard disk.
+files on your hard disk.
 
 ## Installation
 After cloning the repository you have to fetch the required
