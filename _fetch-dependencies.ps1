@@ -9,8 +9,8 @@ try {
 
 	$client.DownloadFile("http://code.jquery.com/jquery-2.1.1.min.js", "$JsDir\jquery-2.1.1.min.js")
 	$client.DownloadFile("http://code.jquery.com/ui/1.11.0/jquery-ui.js", "$JsDir\jquery-ui-1.11.0.js")
-	$client.DownloadFile("https://rawgit.com/eligrey/FileSaver.js/master/FileSaver.js", "$JsDir\FileSaver.js" )
-	$client.DownloadFile("https://rawgit.com/ArthurClemens/Javascript-Undo-Manager/master/js/undomanager.js", "$JsDir\undomanager.js" )
+	$client.DownloadFile("https://raw.githubusercontent.com/eligrey/FileSaver.js/master/FileSaver.js", "$JsDir\FileSaver.js" )
+	$client.DownloadFile("https://raw.githubusercontent.com/ArthurClemens/Javascript-Undo-Manager/master/lib/undomanager.js", "$JsDir\undomanager.js" )
 
 
 	$CssDir =Join-Path -Path $BaseDir -ChildPath "css\lib"

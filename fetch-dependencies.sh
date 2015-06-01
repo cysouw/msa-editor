@@ -29,8 +29,8 @@ curl -sf --compressed http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-
 cd "$JSDESTDIR"
 curl -sf --compressed http://code.jquery.com/jquery-2.1.1.min.js > jquery-2.1.1.min.js 
 curl -sf --compressed http://code.jquery.com/ui/1.11.0/jquery-ui.js > jquery-ui-1.11.0.js
-curl -sf --compressed https://rawgit.com/eligrey/FileSaver.js/master/FileSaver.js > FileSaver.js
-curl -sf --compressed https://rawgit.com/ArthurClemens/Javascript-Undo-Manager/master/js/undomanager.js > undomanager.js
+curl -sf --compressed https://raw.githubusercontent.com/eligrey/FileSaver.js/master/FileSaver.js > FileSaver.js
+curl -sf --compressed https://raw.githubusercontent.com/ArthurClemens/Javascript-Undo-Manager/master/lib/undomanager.js > undomanager.js
 
 SUCCESS=1
 
