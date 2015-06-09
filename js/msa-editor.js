@@ -16,8 +16,24 @@ function MSAFile () {
     this.filename = undefined;
     this.filecontent = undefined; //file content as read in
     this.status = { parsed: false,
-                  edited: false,
-                  mode: 'show'}; // or 'edit'
+                    edited: false,
+                    mode: 'show'}; // or 'edit'
+
+    this.orderChanged = function() {
+        var originals = this.rows.filter(function(element, index, array) {
+            return element instanceof AnnotationRow || element.unique;
+        });
+        if (originals.length !== this.unique_rows.length) {
+            //should never happen
+            return true;
+        }
+        for (var i=0; i< originals.length; i++) {
+            if (String(originals[i].alignment) !== String(this.unique_rows[i].alignment)) {
+                return true;
+            }
+        }
+        return false;
+    };
 }
 
 
@@ -25,14 +41,12 @@ function MSARow() {
     this.id = undefined;
     this.row_header = undefined; //taxon
     this.alignment = []; //always modify in place to keep references valid
+    this.equal_rows = []; //list of rows with the same alignment as this one
     this.unique = true; //if unique === true then alignment contains original data, else alignment is a
                         //shared reference to another row alignment
-}
+    this.empty_symbol = '-';
 
-MSARow.prototype = {
-    empty_symbol: '-',
-
-    exportRow: function (msa_file) {
+    this.exportRow = function (msa_file) {
         var result = '';
         var row_start = [];
         if (msa_file.type == 'with_id') {
@@ -41,15 +55,14 @@ MSARow.prototype = {
         row_start.push(this.fillWithDots(this.row_header, msa_file.taxlen));
         result += row_start.join('\t') + '\t' + this.alignment.join('\t') + '\n';
         return result;
-    },
+    };
 
     // pad the taxon with dots to a specific length
-    fillWithDots: function (name, len) {
-        var dots = '.......................................';
-        return name + dots.substring(0, len - name.length);
-    },
+    this.fillWithDots = function (name, len) {
+        return name + '.'.repeat(Math.max(0, len - name.length));
+    };
 
-    parseRow: function(parts) {
+    this.parseRow = function(parts) {
         if (! isNaN(parts[0])) { //id as first row entry
             this.id = parseInt(parts.shift());
         }
@@ -61,9 +74,9 @@ MSARow.prototype = {
         });
 
         return this.row_header;
-    },
+    };
 
-    getDolgo: function(cell_entry) {
+    this.getDolgo = function(cell_entry) {
         var dolgo = "dolgo_ERROR";
         if (cell_entry in DOLGO) {
             dolgo = "dolgo_" + DOLGO[cell_entry];
@@ -79,9 +92,9 @@ MSARow.prototype = {
             dolgo = "dolgo_GAP";
         }
         return dolgo;
-    },
+    };
 
-    syncRowToDom: function(table_row, tab_index) {
+    this.syncRowToDom = function(table_row, tab_index) {
         //sync cell count
         while(this.alignment.length+1 > table_row.children.length) {
             var table_data = document.createElement('TD');
@@ -112,26 +125,24 @@ MSARow.prototype = {
             }
         }
         return tab_index;
-    }
-};
+    };
+}
 
 
 function AnnotationRow() {
     this.row_header = undefined;
     this.alignment = [];
-}
+    this.empty_symbol = '.';
 
+    this.fillWithDots = function (name, len) {
+        return name + '.'.repeat(Math.max(0, len - name.length));
+    };
 
-AnnotationRow.prototype = {
-    empty_symbol: '.',
-
-    fillWithDots: MSARow.prototype.fillWithDots,
-
-    exportRow: function(msa_file) {
+    this.exportRow = function(msa_file) {
         return ':ANN\t' + this.fillWithDots(this.row_header, msa_file.taxlen) + '\t' + this.alignment.join('\t') + '\n';
-    },
+    };
 
-    parseRow: function(parts) {
+    this.parseRow = function(parts) {
         this.row_header = parts[1].replace(/\.*$/, '');
         this.alignment = parts.slice(2).map(function(x){ 
             x = x.trim();
@@ -139,13 +150,13 @@ AnnotationRow.prototype = {
         });
         
         return this.row_header;
-    },
+    };
 
-    getDolgo: function(cell_entry) {
+    this.getDolgo = function(cell_entry) {
         return '';
-    },
+    };
 
-    syncRowToDom: function(table_row, tab_index) {
+    this.syncRowToDom = function(table_row, tab_index) {
         //sync cell count
         while(this.alignment.length+1 > table_row.children.length) {
             var table_data = document.createElement('TD');
@@ -179,8 +190,9 @@ AnnotationRow.prototype = {
             }
         }
         return tab_index;
-    },
-};
+    };
+}
+
 
 var fileManager = (function () {
     var fileHandles = null;
@@ -195,23 +207,39 @@ var fileManager = (function () {
     }
 
     function exportFile(msa_file) {
-
         var data = '';
-        /*
-        msa_file.meta_information.modified = getDate();
-        for (key in msa_file.meta_information) {
-            data += '@' + key + ': ' + msa_file.meta_information[key] + '\n';
-        }
-        */
-        for(var i=0; i<msa_file.lines.length; i++) {
-            var line = msa_file.lines[i];
-            if (line instanceof MSARow || line instanceof AnnotationRow) {
-                data += line.exportRow(msa_file);
-            }
-            else {
+
+        if (msa_file.orderChanged()) {
+            //reordered file, export only initial comments, annotation and alignment rows
+            for (var i=0; i < msa_file.lines.length; i++) {
+                var line = msa_file.lines[i];
+                if (!(typeof line === 'string' || line instanceof String)) {
+                    break;
+                }
                 data += line;
             }
+            for (var i=0; i < msa_file.unique_rows.length; i++) {
+                var row = msa_file.unique_rows[i];
+                data += row.exportRow(msa_file);
+                if (row instanceof MSARow) {
+                    for (var j=0; j < row.equal_rows.length; j++) {
+                        data += row.equal_rows[j].exportRow(msa_file);
+                    }
+                }
+            }
+        } else {
+            //export file as close as possible to the original
+            for(var i=0; i<msa_file.lines.length; i++) {
+                var line = msa_file.lines[i];
+                if (line instanceof MSARow || line instanceof AnnotationRow) {
+                    data += line.exportRow(msa_file);
+                }
+                else {
+                    data += line;
+                }
+            }
         }
+
         var blob = new Blob([data], {
             type: "text/plain;charset=utf-8"
         });
@@ -348,6 +376,9 @@ function parseMSA(msa_file) {
     var text = msa_file.filecontent;
     var lines = text.split(/\r\n|\n/);
 
+    while (lines.length > 0 && lines[lines.length-1].trim() === ''){
+        lines.pop();
+    }
     for (var i = 0; i < lines.length; i++) {
         var line = lines[i].trim();
         var start = line[0];
@@ -398,10 +429,11 @@ function parseMSA(msa_file) {
         var word = row.alignment.join('').replace(/-/g, '');
         if (word in seen) {
             row.unique = false;
-            row.alignment = seen[word];
+            row.alignment = seen[word].alignment;
+            seen[word].equal_rows.push(row);
         } else {
             msa_file.unique_rows.push(row);
-            seen[word] = row.alignment;
+            seen[word] = row;
         }
     }
             
@@ -702,6 +734,12 @@ var tableSelection = (function () {
                 } else {
                     executeOperation(function(msa, sel) {moveSelectionRight(msa, sel);});
                 }
+            } else if ([38,40].indexOf(event.keyCode) !== -1 && (event.ctrlKey || event.metaKey)) {
+                if (event.keyCode === 38) {
+                    executeOperation(function(msa, sel) {moveSelectionUp(msa, sel);});
+                } else {
+                    executeOperation(function(msa, sel) {moveSelectionDown(msa, sel);});
+                }
             } else if ([37,38,39,40].indexOf(event.keyCode) != -1) { //arrow keys
                 var nx = position.x;
                 var ny = position.y;
@@ -982,6 +1020,37 @@ function moveSelectionRight(msa_file, selection) {
     normalizeMsa(msa_file, 'right');
     msa_file.status.edited = true;
     tableSelection.moveSelection(1,0);
+}
+
+function moveSelectionUp(msa_file, selection) {
+    var rows = msa_file.unique_rows;
+
+    //early return if
+    //1. already at first entry or
+    //2. move would mess up the annotation rows at the top of the table
+    if (selection.ul.y === 0 || rows[selection.ul.y-1].constructor !== rows[selection.lr.y].constructor) return;
+    
+    var moved = rows.splice(selection.ul.y-1, 1);
+    rows.splice(selection.lr.y, 0, moved[0]);
+    
+    msa_file.status.edited = true;
+    tableSelection.moveSelection(0,-1);
+}
+
+function moveSelectionDown(msa_file, selection) {
+    var rows = msa_file.unique_rows;
+
+    //early return if
+    //1. already at last entry or
+    //2. move would mess up the annotation rows at the top of the table
+    if (selection.lr.y + 1 === rows.length ||
+        rows[selection.ul.y].constructor !== rows[selection.lr.y+1].constructor) return;
+
+    var moved = rows.splice(selection.lr.y+1, 1);
+    rows.splice(selection.ul.y, 0, moved[0]);
+
+    msa_file.status.edited = true;
+    tableSelection.moveSelection(0,1);
 }
 
 function normalizeMsa(msa_file, filling_from){
