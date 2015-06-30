@@ -76,24 +76,6 @@ function MSARow() {
         return this.row_header;
     };
 
-    this.getDolgo = function(cell_entry) {
-        var dolgo = "dolgo_ERROR";
-        if (cell_entry in DOLGO) {
-            dolgo = "dolgo_" + DOLGO[cell_entry];
-        } else if (cell_entry.slice(0, 2) in DOLGO) {
-            dolgo = "dolgo_" + DOLGO[cell_entry.slice(0, 2)];
-        } else if (cell_entry.slice(0, 1) in DOLGO) {
-            dolgo = "dolgo_" + DOLGO[cell_entry.slice(0, 1)];
-        } else if (cell_entry.slice(1, 3) in DOLGO) {
-            dolgo = "dolgo_" + DOLGO[cell_entry.slice(1, 3)];
-        } else if (cell_entry.slice(1, 2) in DOLGO) {
-            dolgo = "dolgo_" + DOLGO[cell_entry.slice(1, 2)];
-        } else if (cell_entry == "-") {
-            dolgo = "dolgo_GAP";
-        }
-        return dolgo;
-    };
-
     this.syncRowToDom = function(table_row, tab_index) {
         //sync cell count
         while(this.alignment.length+1 > table_row.children.length) {
@@ -119,9 +101,8 @@ function MSARow() {
             textNode = cell.childNodes[0];
             if (textNode.nodeValue !== this.alignment[col_idx]) {
                 textNode.nodeValue = this.alignment[col_idx];
-                //update dolgo css
-                cell.className = cell.className.replace(/(?:^|\s)dolgo_[^\s]*(?!\S)/g , '' );
-                cell.classList.add(this.getDolgo(this.alignment[col_idx]));
+                //update background color
+                cell.style.backgroundColor = getCssBackgroundColor(this.alignment[col_idx]);
             }
         }
         return tab_index;
@@ -152,10 +133,6 @@ function AnnotationRow() {
         return this.row_header;
     };
 
-    this.getDolgo = function(cell_entry) {
-        return '';
-    };
-
     this.syncRowToDom = function(table_row, tab_index) {
         //sync cell count
         while(this.alignment.length+1 > table_row.children.length) {
@@ -181,12 +158,8 @@ function AnnotationRow() {
             textNode = cell.childNodes[0];
             if (textNode.nodeValue !== this.alignment[col_idx]) {
                 textNode.nodeValue = this.alignment[col_idx];
-                //update dolgo css
-                cell.className = cell.className.replace(/(?:^|\s)dolgo_[^\s]*(?!\S)/g , '' );
-                var css_cls = this.getDolgo(this.alignment[col_idx]);
-                if (css_cls !== '') {
-                    cell.classList.add(css_cls);
-                }
+                //update backgroundColor
+                cell.style.backgroundColor = '';
             }
         }
         return tab_index;
@@ -526,21 +499,19 @@ function showMSA(msa_file, edit_mode) {
         }
         text += '<tr class="' + row_class + '"><td class="taxon">' + row.row_header + '</td>';
         for (var col_idx = 0; col_idx < alignment.length; col_idx++) {
-            var cell = alignment[col_idx];
-            if (cell === '') cell = '&nbsp;'; //make sure a textNode gets allways created as a child of table data node
-            var dolgo = row.getDolgo(cell);
-            var tab_definition;
+            cell = '&nbsp;'; //make sure a textNode gets always created as a child of table data node
             if (edit_mode) {
                 tab_definition = '" tabindex=' + tabindex;
             } else {
                 tab_definition = '';
             }
-            text += '<td class="' + css_class +' ' + dolgo + tab_definition + '">' + cell + '</td>';
+            text += '<td class="' + css_class + tab_definition + '">' + cell + '</td>';
             tabindex++;
         }
         text += '</tr>';
     }
     msa_body.innerHTML = text;
+    syncMsaToDom(msa_file);
 
     $(document).off('keydown'); 
     if (msa_file.status.mode === 'edit') {

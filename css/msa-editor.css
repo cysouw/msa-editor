@@ -139,23 +139,6 @@ td.active {
   width: 600px;
   height: 300px;
 }
-  
-
-td.dolgo_ERROR{background-color: white; color:red;}
-td.dolgo_V{background-color: #c89696;}
-td.dolgo_K{background-color: #c8af96;} 
-td.dolgo_P{background-color: #c8c864;} 
-td.dolgo_H{background-color: #96c8b0;} 
-td.dolgo_J{background-color: #96c896;} 
-td.dolgo_M{background-color: #96c8af;} 
-td.dolgo_N{background-color: #96c8c8;} 
-td.dolgo_S{background-color: #96c8c8;} 
-td.dolgo_R{background-color: #96c8c3;} 
-td.dolgo_T{background-color: #af96c8;} 
-td.dolgo_W{background-color: #c864c8;} 
-td.dolgo_1{background-color: #c896af;} 
-td.dolgo_X{background-color: #cccccc;}
-td.dolgo_GAP{background-color: #cccccc;}
         
 .ui-widget-overlay
 {
