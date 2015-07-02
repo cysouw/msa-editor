@@ -36,6 +36,28 @@ function MSAFile () {
     };
 }
 
+// utility function for MSARow and AnnotationRow
+// pad the taxon with dots to a specific length
+this.fillWithDots = function (name, len) {
+    var count = Math.max(0, len - name.length);
+    if (String.prototype.repeat) {
+        return name + '.'.repeat(count);
+    } else {
+        var result = name;
+        var dots = '.';
+        while(count) {
+            if (count % 2 == 1) {
+		result += dots;
+	    }
+	    if (count > 1) {
+		dots += dots;
+	    }
+	    count >>= 1;
+        }
+        return result;
+    }
+};
+
 
 function MSARow() {
     this.id = undefined;
@@ -52,14 +74,9 @@ function MSARow() {
         if (msa_file.type == 'with_id') {
             row_start.push(this.id);
         }
-        row_start.push(this.fillWithDots(this.row_header, msa_file.taxlen));
+        row_start.push(fillWithDots(this.row_header, msa_file.taxlen));
         result += row_start.join('\t') + '\t' + this.alignment.join('\t') + '\n';
         return result;
-    };
-
-    // pad the taxon with dots to a specific length
-    this.fillWithDots = function (name, len) {
-        return name + '.'.repeat(Math.max(0, len - name.length));
     };
 
     this.parseRow = function(parts) {
@@ -115,12 +132,8 @@ function AnnotationRow() {
     this.alignment = [];
     this.empty_symbol = '.';
 
-    this.fillWithDots = function (name, len) {
-        return name + '.'.repeat(Math.max(0, len - name.length));
-    };
-
     this.exportRow = function(msa_file) {
-        return ':ANN\t' + this.fillWithDots(this.row_header, msa_file.taxlen) + '\t' + this.alignment.join('\t') + '\n';
+        return ':ANN\t' + fillWithDots(this.row_header, msa_file.taxlen) + '\t' + this.alignment.join('\t') + '\n';
     };
 
     this.parseRow = function(parts) {
