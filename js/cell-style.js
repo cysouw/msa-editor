@@ -50,6 +50,5 @@ function getRandomBackgroundColor(content) {
         return Math.floor((v+m)*256);
     });
     styleCache[content[0]] = result;
-    console.log(result);
     return result;
 }
