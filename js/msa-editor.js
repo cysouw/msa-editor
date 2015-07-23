@@ -529,9 +529,11 @@ function showMSA(msa_file, edit_mode) {
     $(document).off('keydown'); 
     if (msa_file.status.mode === 'edit') {
         $(document).keydown(tableSelection.keydownHandler);
-        $("TD").mousedown(tableSelection.mousedownHandler);
-        $("TD").dblclick(tableSelection.openEditDialog);
-    
+        var td = document.querySelectorAll('TD');
+        for (var i = 0; i < td.length; i++) {
+            td[i].onmousedown  = tableSelection.mousedownHandler;
+            td[i].ondblclick = tableSelection.openEditDialog;
+        }
     }
     
     document.getElementById('view').disabled = !edit_mode;
