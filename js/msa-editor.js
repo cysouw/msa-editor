@@ -67,6 +67,7 @@ function MSARow() {
     this.unique = true; //if unique === true then alignment contains original data, else alignment is a
                         //shared reference to another row alignment
     this.empty_symbol = '-';
+    this.dirty = true;
 
     this.exportRow = function (msa_file) {
         var result = '';
@@ -94,6 +95,7 @@ function MSARow() {
     };
 
     this.syncRowToDom = function(table_row, tab_index) {
+        if (!this.dirty) return tab_index + this.alignment.length;
         //sync cell count
         while(this.alignment.length+1 > table_row.children.length) {
             var table_data = document.createElement('TD');
@@ -122,6 +124,7 @@ function MSARow() {
                 cell.style.backgroundColor = getCssBackgroundColor(this.alignment[col_idx]);
             }
         }
+        this.dirty = false;
         return tab_index;
     };
 }
@@ -131,6 +134,7 @@ function AnnotationRow() {
     this.row_header = undefined;
     this.alignment = [];
     this.empty_symbol = '.';
+    this.dirty = true;
 
     this.exportRow = function(msa_file) {
         return ':ANN\t' + fillWithDots(this.row_header, msa_file.taxlen) + '\t' + this.alignment.join('\t') + '\n';
@@ -147,6 +151,7 @@ function AnnotationRow() {
     };
 
     this.syncRowToDom = function(table_row, tab_index) {
+        if (! this.dirty) return tab_index + this.alignment.length;
         //sync cell count
         while(this.alignment.length+1 > table_row.children.length) {
             var table_data = document.createElement('TD');
@@ -175,6 +180,7 @@ function AnnotationRow() {
                 cell.style.backgroundColor = '';
             }
         }
+        this.dirty = false;
         return tab_index;
     };
 }
@@ -505,6 +511,7 @@ function showMSA(msa_file, edit_mode) {
         var row = rows[row_idx];
         var alignment = row.alignment;
         var row_class;
+        row.dirty = true;
         if (row instanceof AnnotationRow) {
             row_class = 'ann_row';
         } else {
@@ -872,6 +879,7 @@ function getAlignmentState(msa_file) {
 function setAlignmentState(msa_file, alignments) {
     var rows = msa_file.unique_rows;
     for (var i = 0; i < rows.length; i++) {
+        rows[i].dirty = true;
         //modify alignment in place to keep referencing rows in sync with change
         var splice_args = [0, rows[i].alignment.length];
         Array.prototype.push.apply(splice_args, alignments[i]);
@@ -904,6 +912,7 @@ function executeOperation(func) {
 function splitSelectionAndFill(msa_file, selection, filling_from) {
     var rows = msa_file.unique_rows;
     for (var y = selection.ul.y; y <= selection.lr.y; y++) {
+        rows[y].dirty = true;
         var splice_args = [selection.ul.x, selection.lr.x-selection.ul.x+1];
         for (var x = selection.ul.x; x <= selection.lr.x; x++) {
             Array.prototype.push.apply(splice_args, splitString(rows[y].alignment[x]));
@@ -922,19 +931,20 @@ function mergeSelectionAndFill(msa_file, selection, filling_from) {
         var row = rows[y];
         var repl = '';
 
+        row.dirty = true;
         var filler_args = [fill_position, 0];
         for (var i = selection.ul.x; i < selection.lr.x; i++) {
             filler_args.push(row.empty_symbol);
         }
         
         for (var x = selection.ul.x; x <= selection.lr.x; x++) {
-            if (rows[y].alignment[x] !== row.empty_symbol && rows[y].alignment[x] !== '?') {
-                repl += rows[y].alignment[x];
+            if (row.alignment[x] !== row.empty_symbol && row.alignment[x] !== '?') {
+                repl += row.alignment[x];
             }
         }
         if (repl === '') repl = row.empty_symbol;
-        rows[y].alignment.splice(selection.ul.x, selection.lr.x-selection.ul.x+1, repl);
-        Array.prototype.splice.apply(rows[y].alignment, filler_args);
+        row.alignment.splice(selection.ul.x, selection.lr.x-selection.ul.x+1, repl);
+        Array.prototype.splice.apply(row.alignment, filler_args);
     }
     msa_file.status.edited = true;
 }
@@ -943,6 +953,7 @@ function deleteSelectionAndFill(msa_file, selection, filling_from) {
     var rows = msa_file.unique_rows;
     var count = selection.lr.x-selection.ul.x+1;
     for (var y=selection.ul.y; y<=selection.lr.y; y++) {
+        rows[y].dirty = true;
         rows[y].alignment.splice(selection.ul.x, count);
     }
     msa_file.status.edited = true;
@@ -953,6 +964,7 @@ function moveSelectionLeft(msa_file, selection) {
     var rows = msa_file.unique_rows;
 
     for(var run_y = selection.ul.y; run_y <= selection.lr.y; run_y++) {
+        rows[run_y].dirty = true;
         rows[run_y].alignment.splice(selection.lr.x + 1, 0, rows[run_y].empty_symbol);
     }
 
@@ -983,6 +995,7 @@ function moveSelectionRight(msa_file, selection) {
     var rows = msa_file.unique_rows;
 
     for(var run_y = selection.ul.y; run_y <= selection.lr.y; run_y++) {
+        rows[run_y].dirty = true;
         rows[run_y].alignment.splice(selection.ul.x, 0, rows[run_y].empty_symbol);
     }
 
@@ -1019,6 +1032,10 @@ function moveSelectionUp(msa_file, selection) {
     var moved = rows.splice(selection.ul.y-1, 1);
     rows.splice(selection.lr.y, 0, moved[0]);
     
+    for(var i= selection.ul.y-1; i <= selection.lr.y; i++) {
+        rows[i].dirty = true;
+    }
+
     msa_file.status.edited = true;
     tableSelection.moveSelection(0,-1);
 }
@@ -1035,6 +1052,10 @@ function moveSelectionDown(msa_file, selection) {
     var moved = rows.splice(selection.lr.y+1, 1);
     rows.splice(selection.ul.y, 0, moved[0]);
 
+    for(var i= selection.ul.y; i <= selection.lr.y+1; i++) {
+        rows[i].dirty = true;
+    }
+    
     msa_file.status.edited = true;
     tableSelection.moveSelection(0,1);
 }
@@ -1052,11 +1073,14 @@ function normalizeMsa(msa_file, filling_from){
     msa_file.width = max;
     for (i=0; i< msa_file.unique_rows.length; i++) {
         var row = msa_file.unique_rows[i];
-        while (row.alignment.length < max) {
-            if (filling_from == 'right') {
-                row.alignment.push(row.empty_symbol);
-            } else {
-                row.alignment.splice(0, 0, row.empty_symbol);
+        if (row.alignment.length < max) {
+            row.dirty = true;
+            while (row.alignment.length < max) {
+                if (filling_from == 'right') {
+                    row.alignment.push(row.empty_symbol);
+                } else {
+                    row.alignment.splice(0, 0, row.empty_symbol);
+                }
             }
         }
     }
@@ -1085,6 +1109,7 @@ function removeGapColumns(msa_file) {
         msa_file.width -= 1;
         for(var i=0; i< msa_file.unique_rows.length; i++) {
             var row = msa_file.unique_rows[i];
+            row.dirty = true;
             row.alignment.splice(x,1);
         }
     }
