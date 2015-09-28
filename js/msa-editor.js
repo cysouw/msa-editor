@@ -11,7 +11,7 @@ function MSAFile () {
     this.rows = []; //alignments
     this.unique_rows = [];
     this.width = 0; //width of the alignment table without the taxon
-    this.type = 'basic'; //or 'with_id'
+    this.with_id = true; // assume the first column of every row contains an ID
     this.taxlen = 0; //max length of taxa
     this.filename = undefined;
     this.filecontent = undefined; //file content as read in
@@ -72,7 +72,7 @@ function MSARow() {
     this.exportRow = function (msa_file) {
         var result = '';
         var row_start = [];
-        if (msa_file.type == 'with_id') {
+        if (msa_file.with_id) {
             row_start.push(this.id);
         }
         row_start.push(fillWithDots(this.row_header, msa_file.taxlen));
@@ -80,8 +80,8 @@ function MSARow() {
         return result;
     };
 
-    this.parseRow = function(parts) {
-        if (! isNaN(parts[0])) { //id as first row entry
+    this.parseRow = function(parts, with_id) {
+        if (with_id) { //id as first row entry
             this.id = parseInt(parts.shift());
         }
     
@@ -376,6 +376,15 @@ function parseMSA(msa_file) {
         var start = line[0];
         if (start === '#') {
             msa_file.lines.push(line + '\n');
+            // split key, value pairs on ':'
+            index = line.indexOf(':');
+            if (index !== -1) {
+                key = line.substr(1, index-1).trim();
+                val = line.substr(index+1).trim();
+                if (key === 'with_id') {
+                    msa_file.with_id = (['false', 'no', '0' ].indexOf(val.toLowerCase()) === -1);
+                }
+            }
             continue;
         }
         if (start == '@') {
@@ -402,13 +411,10 @@ function parseMSA(msa_file) {
             } else {
                 row = new MSARow();
                 msa_file.rows.push(row);
-                if (! isNaN(parts[0])) {
-                    msa_file.type = 'with_id';
-                }
             }
             msa_file.lines.push(row);
 
-            var row_header = row.parseRow(parts);
+            var row_header = row.parseRow(parts, msa_file.with_id);
             msa_file.taxlen = Math.max(msa_file.taxlen, row_header.length);
             msa_file.width = Math.max(msa_file.width, row.alignment.length);
         }
