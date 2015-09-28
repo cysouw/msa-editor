@@ -13,10 +13,10 @@ function getRandomBackgroundColor(content) {
         return styleCache[content[0]];
     }
     
-    //define as HSL with a lightness of 0.7 to ensure enough contrast
-    var hue = Math.floor(Math.random()*360);
-    var saturation = 1;
-    var lightness = 0.75;
+    //define as HSL with a high lightness to ensure enough contrast with black text
+    var hue = Math.floor(Math.random()*360); // range 0-359
+    var saturation = 1; // range 0-1
+    var lightness = 0.75; // range 0-1
 
     //convert to RGB
     var chroma = (1 - Math.abs(2*lightness-1))*saturation;
