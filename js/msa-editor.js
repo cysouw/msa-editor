@@ -1,7 +1,3 @@
-if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
-    alert("The File APIs are not fully supported in this browser.");
-}
-
 function MSAFile () {
     this.meta_information = {}; //lines of the form "@<key>:<value>"
     this.dataset = undefined; //header entry
