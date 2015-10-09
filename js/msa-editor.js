@@ -78,7 +78,7 @@ function MSARow() {
 
     this.parseRow = function(parts, with_id) {
         if (with_id) { //id as first row entry
-            this.id = parseInt(parts.shift());
+            this.id = parts.shift();
         }
     
         this.row_header = parts[0].replace(/\.*$/, '');
