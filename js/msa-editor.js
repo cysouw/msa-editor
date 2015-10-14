@@ -270,15 +270,39 @@ var fileManager = (function () {
             }
             var handle = fileHandles[active_idx];
             var msa = new MSAFile();
-            MSAFiles[active_idx] = msa;
             var reader = new FileReader();
-            reader.onload = function (msa_obj) {
+            msa.filename = handle.name;
+            reader.onload = function (msa, MSAFiles, active_idx) {
                 return function (event) {
-                    msa_obj.filecontent = event.target.result;
+                    msa.filecontent = event.target.result;
+                    MSAFiles[active_idx] = msa;
                     var elem = document.getElementById('msa_select');
                     elem.onchange(elem);
                 };
-            }(msa);
+            }(msa, MSAFiles, active_idx);
+            reader.onerror = function(event) {
+                var error = event.target.error;
+                if (error.name !== undefined) {
+                    alert("Reloading failed with the following error code: " + error.name);
+                } else if (window.FileError !== undefined && error instanceof FileError) {
+                    //Safari
+                    if (error.code == FileError.NOT_FOUND_ERR) {
+                        alert("Reloading failed with error code NOT_FOUND_ERR. The Reload feature is known not to " +
+                              "work in Safari if you change the file outside the Browser before reloading. " +
+                              "In this case, please use another browser.");
+                    } else {
+                        code_to_name = {};
+                        for(var name in FileError) {
+                            if (name.endsWith("ERR")) {
+                                code_to_name[FileError[name]] = name;
+                            }
+                        }
+                        alert("Reloading failed with the following error code: " + code_to_name[error.code] + '.');
+                    }
+                } else {
+                    alert("Reloading failed with an unexpected error: " + error);
+                }
+            };
             reader.readAsText(handle);
         },
 
