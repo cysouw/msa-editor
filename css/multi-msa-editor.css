@@ -1,0 +1,173 @@
+#msa {
+  background-color: white;
+}
+
+#store {
+  display: none;
+}
+
+.residue {
+  display: table-cell;
+  width: 50px;
+  background-color: #f1f1f1;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
+.residue_show {
+  display: table-cell;
+  width: 50px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.new_gap {
+  display: table-cell;
+  width: 50px;
+  background-color: #f1f1f1;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  cursor: move;
+}
+
+table {
+    border-spacing: 0px;
+}
+
+table.helptable {
+    margin: 1em 0px;
+    border-spacing: 0px;
+    border-collapse: collapse;
+    background-color: #F9F9F9;
+    border: 1px solid #AAA;
+    color: #000;
+}
+
+table.helptable td {
+    border: 1px solid #AAA;
+    padding: 2px 0.75ex 2px;
+}
+
+table.helptable td.center {
+    text-align: center;
+}
+
+table.helptable th {
+    border: 1px solid #AAA;
+    padding: 2px 0.75ex;
+}
+
+td {
+  border: 2px solid transparent;
+}
+
+td:focus {
+  border: 2px solid red !important;
+}
+
+td.selected-left {
+  border-left: 2px solid #cc0000;
+}
+
+td.selected-right {
+  border-right: 2px solid #cc0000;
+}
+
+td.selected-top {
+  border-top: 2px solid #cc0000;
+}
+
+td.selected-bottom {
+  border-bottom: 2px solid #cc0000;
+}
+
+td.active {
+  border: 2px solid red;
+}
+
+.active {
+  background-color: LightBlue;
+  cursor: pointer;
+  display: inline;
+  disabled: false;
+}
+
+.inactive {
+  cursor: default;
+  disabled: true;
+}
+
+.taxon {
+  display: table-cell;
+  font-weight: bold;
+  text-align: left;
+  background-color: white;
+}
+.header {
+  font-weight: bold;
+  text-align: left;
+  background-color: LightBlue;
+}
+.submit {
+  border: 1px solid black;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+.submit2 {
+  border: 1px solid black;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-right: 2px;
+  padding-left: 2px;
+}
+.annotation {
+  background-color: LightGray;
+  text-align: center;
+  color: DarkGray;
+}
+.annotation_type {
+  background-color: LightGray;
+  text-align: left;
+  color:DarkGray;
+}
+#source {
+  background-color: LightGray;
+  width: 600px;
+  height: 300px;
+}
+        
+.ui-widget-overlay
+{
+    background: #000;
+    opacity: .6;
+}
+
+.floating-header {
+  position: fixed;
+  top: 0;
+  visibility: hidden;
+  background: white;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    display: flex;
+    flex-flow: column
+}
+
+tfoot input {
+    width: 100%;
+    padding: 3px;
+    box-sizing: borer-box;
+}
+
+#data_table_wrapper {
+    padding-top: 10px;
+}

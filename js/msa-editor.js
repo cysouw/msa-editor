@@ -240,6 +240,11 @@ var fileManager = (function () {
     }
 
     return {
+        setFiles: function(files, _active_idx) {
+            MSAFiles = files;
+            active_idx = 0;
+        },
+
         handleFiles: function (_fileHandles) { //user selected new set of files
             fileHandles = _fileHandles;
             //clear drop down list
@@ -562,10 +567,13 @@ function showMSA(msa_file, edit_mode) {
             td[i].ondblclick = tableSelection.openEditDialog;
         }
     }
-    
-    document.getElementById('view').disabled = !edit_mode;
-    document.getElementById('edit').disabled = edit_mode;
-    document.getElementById('minimize').style.display = (edit_mode && 'inline' || 'none');
+ 
+    if (document.getElementById('view'))
+        document.getElementById('view').disabled = !edit_mode;
+    if (document.getElementById('edit'))
+        document.getElementById('edit').disabled = edit_mode;
+    if (document.getElementById('minimize'))
+        document.getElementById('minimize').style.display = (edit_mode && 'inline' || 'none');
     if (edit_mode) tableSelection.initializeSelection();
     cloneTableHeaders();
 }
@@ -1246,7 +1254,7 @@ function keepActiveNodeVisible() {
 
 
 //initialisation
-window.onload = function() {
+function MSAEditorOnLoad() {
     //check if all dependencies are loaded:
     errMsg = checkDependencies();
     if (errMsg !== '') {
@@ -1303,5 +1311,5 @@ window.onload = function() {
     //sticky table header
     $(window)
         .scroll(updateTableHeaders)
-        .trigger("scroll");    
+        .trigger("scroll");
 };
