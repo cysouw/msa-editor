@@ -1,7 +1,5 @@
 function MSAFile () {
     this.meta_information = {}; //lines of the form "@<key>:<value>"
-    this.dataset = undefined; //header entry
-    this.alignment = undefined; //header entry
     this.lines = []; //parsed file: mix of comment lines and rows
     this.annotations = [];
     this.rows = []; //alignments
@@ -11,6 +9,7 @@ function MSAFile () {
     this.taxlen = 0; //max length of taxa
     this.filename = undefined;
     this.filecontent = undefined; //file content as read in
+    this.original_fileformat = null;
     this.status = { parsed: false,
                     edited: false,
                     mode: 'show'}; // or 'edit'
@@ -65,14 +64,14 @@ function MSARow() {
     this.empty_symbol = '-';
     this.dirty = true;
 
-    this.exportRow = function (msa_file) {
+    this.exportRow = function (msa_file, secondary_separator) {
         var result = '';
         var row_start = [];
         if (msa_file.with_id) {
             row_start.push(this.id);
         }
         row_start.push(fillWithDots(this.row_header, msa_file.taxlen));
-        result += row_start.join('\t') + '\t' + this.alignment.join('\t') + '\n';
+        result += row_start.join('\t') + '\t' + this.alignment.join(secondary_separator) + '\n';
         return result;
     };
 
@@ -132,8 +131,9 @@ function AnnotationRow() {
     this.empty_symbol = '.';
     this.dirty = true;
 
-    this.exportRow = function(msa_file) {
-        return ':ANN\t' + fillWithDots(this.row_header, msa_file.taxlen) + '\t' + this.alignment.join('\t') + '\n';
+    this.exportRow = function(msa_file, secondary_separator) {
+        return ':ANN\t' + fillWithDots(this.row_header, msa_file.taxlen) + '\t' + 
+            this.alignment.join(secondary_separator) + '\n';
     };
 
     this.parseRow = function(parts) {
@@ -183,6 +183,7 @@ function AnnotationRow() {
 
 
 var fileManager = (function () {
+    var fileFormat = null;
     var fileHandles = null;
     var MSAFiles = null;
     var active_idx = -1; //-1 means no valid selection
@@ -195,6 +196,10 @@ var fileManager = (function () {
     }
 
     function exportFile(msa_file) {
+        if (fileFormat === null) {
+            alert('No file format selected');
+            return;
+        }
         var data = '';
 
         if (msa_file.orderChanged()) {
@@ -208,10 +213,10 @@ var fileManager = (function () {
             }
             for (var i=0; i < msa_file.unique_rows.length; i++) {
                 var row = msa_file.unique_rows[i];
-                data += row.exportRow(msa_file);
+                data += row.exportRow(msa_file, fileFormat.secondary_separator);
                 if (row instanceof MSARow) {
                     for (var j=0; j < row.equal_rows.length; j++) {
-                        data += row.equal_rows[j].exportRow(msa_file);
+                        data += row.equal_rows[j].exportRow(msa_file, fileFormat.secondary_separator);
                     }
                 }
             }
@@ -220,7 +225,7 @@ var fileManager = (function () {
             for(var i=0; i<msa_file.lines.length; i++) {
                 var line = msa_file.lines[i];
                 if (line instanceof MSARow || line instanceof AnnotationRow) {
-                    data += line.exportRow(msa_file);
+                    data += line.exportRow(msa_file, fileFormat.secondary_separator);
                 }
                 else {
                     data += line;
@@ -310,8 +315,22 @@ var fileManager = (function () {
             //user selects a msa file from drop down list
             var selected_idx = parseInt(event.value);
             active_idx = selected_idx;
+            if (!MSAFiles[selected_idx].status.parsed) {
+                parseMSA(MSAFiles[selected_idx], fileFormat);
+            }
             showMSA(MSAFiles[selected_idx], false);
             setEditMode(false);
+        },
+
+        handleFileFormatSelect: function(event) {
+            if (event.value == 'nested') {
+                fileFormat = nestedFormat;
+            } else if (event.value == 'flat') {
+                fileFormat = flatFormat;
+            } else {
+                alert("Unknown file format");
+                fileFormat = null;
+            }
         },
 
         showSelectedFile: function(unique){
@@ -348,7 +367,7 @@ var fileManager = (function () {
             }
             var count = 0;
             for (var i=0; i<MSAFiles.length; i++) {
-                if (MSAFiles[i].status.edited) {
+                if (MSAFiles[i].status.edited || fileFormat !== MSAFiles[i].original_fileformat) {
                     if (i === active_idx) {
                         if (edit_mode){
                             executeOperation(removeGapColumnsForActive);
@@ -384,10 +403,11 @@ function undoManagerChanged() {
     redo.disabled = !undoManager.hasRedo();
 }
 
-function parseMSA(msa_file) {
+function parseMSA(msa_file, fileformat) {
     var text = msa_file.filecontent;
     var lines = text.split(/\r\n|\n/);
 
+    msa_file.original_fileformat = fileformat;
     while (lines.length > 0 && lines[lines.length-1].trim() === ''){
         lines.pop();
     }
@@ -414,16 +434,7 @@ function parseMSA(msa_file) {
             val = keyval[1].trim();
             msa_file.meta_information.key = val;
         } else {
-            var parts = line.split('\t');
-            if (parts.length === 1) { // special row? maybe first or second row
-                if (i === 0) {
-                    msa_file.dataset = line;
-                } else if ( i === 1 ) {
-                    msa_file.alignment = line;
-                }
-                msa_file.lines.push(line + '\n');
-                continue;
-            }
+            var parts = fileformat.splitLine(line, msa_file.with_id || line.substring(0,4) === ':ANN');
             var row;
             if ( start === ':' && line.substring(0,4) === ':ANN' ) {
                 row = new AnnotationRow();
@@ -466,10 +477,6 @@ function parseMSA(msa_file) {
 
 //has to be called to propagate updates of the msa_file during edit to the DOM
 function syncMsaToDom(msa_file) {
-    if (msa_file.status.parsed === false) {
-        parseMSA(msa_file);
-    }
-
     var rows;
     if (msa_file.status.mode == 'edit') {
         rows = msa_file.unique_rows;
@@ -499,21 +506,8 @@ function syncMsaToDom(msa_file) {
 
 //completely rebuild DOM table for the given msa_file
 function showMSA(msa_file, edit_mode) {
-    /* parse MSA files */
-    if (msa_file.status.parsed === false) {
-        parseMSA(msa_file);  
-    }
-
     var msa_head = document.getElementById('msa_head');
     var text = '';
-    if (msa_file.dataset !== undefined) {
-        text += '<tr class="header"><th id="dataset" class="header" colspan="' + (msa_file.width + 1) +
-            '">DATASET: ' + msa_file.dataset + "</th></tr>";
-    }
-    if (msa_file.alignment !== undefined) {
-        text += '<tr class="header"><th id="alignment" class="header" colspan="' + (msa_file.width + 1) +
-            '">ALIGNMENT: ' + msa_file.alignment + '</th></tr>';
-    }
     if (text.length !== 0) {
         msa_head.innerHTML = text;
     }
@@ -1262,6 +1256,10 @@ window.onload = function() {
     undoManager = new UndoManager();
     undoManager.setCallback(undoManagerChanged);
     undoManagerChanged();
+
+    //initialize FileFormat properly
+    var event = new Event('change');
+    document.getElementById('msa_file_format').dispatchEvent(event);
 
     //prepare dialogs
     $("#reload_dialog").dialog({

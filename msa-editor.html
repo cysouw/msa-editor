@@ -12,6 +12,8 @@
     <script type="text/javascript" src="js/lib/undomanager.js"></script>
     <script type="text/javascript" src="js/cell-style.js"></script>
     <script type="text/javascript" src="js/msa-editor.js"></script>
+    <script type="text/javascript" src="js/flat-format.js"></script>
+    <script type="text/javascript" src="js/nested-format.js"></script>
   </head>
   <body>
   <h3>MSA Editor</h3>
@@ -21,6 +23,11 @@
 	onchange="fileManager.handleFiles(this.files)" class="submit2 active"/>
     <select id="msa_select" style='display: none'
 	onchange="fileManager.handleFileSelect(this)"></select>
+    <label>File Format</label>
+    <select id="msa_file_format" onchange="fileManager.handleFileFormatSelect(this)">
+      <option value="nested">SPACE-Separated inside TABs</option>
+      <option value="flat">Flat with TABs</option>
+    </select>    
     <input id="view" type="button"
 	onclick="fileManager.showSelectedFile(false)" class="submit inactive" value="View" />
     <input id='edit' type="button" onclick="fileManager.showSelectedFile(true)"
