@@ -24,11 +24,15 @@ rm -rf "$CSSDESTDIR"
 mkdir "$CSSDESTDIR"
 
 cd "$CSSDESTDIR"
-curl -sf --compressed http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css > jquery-ui-1.11.0-smoothness.css 
+curl -sf --compressed http://jqueryui.com/resources/download/jquery-ui-themes-1.11.4.zip > jquery-ui-themes-1.11.4.zip
+unzip -uq jquery-ui-themes-1.11.4.zip jquery-ui-themes-1.11.4/themes/smoothness/\* || [ $? -eq 1 ]
+mv jquery-ui-themes-1.11.4/themes/smoothness .
+rm -r jquery-ui-themes-1.11.4
 
 cd "$JSDESTDIR"
-curl -sf --compressed http://code.jquery.com/jquery-2.1.1.min.js > jquery-2.1.1.min.js 
-curl -sf --compressed http://code.jquery.com/ui/1.11.0/jquery-ui.js > jquery-ui-1.11.0.js
+curl -sf --compressed http://code.jquery.com/jquery-2.1.4.min.js > jquery-2.1.4.min.js 
+curl -sf --compressed http://code.jquery.com/ui/1.11.4/jquery-ui.js > jquery-ui-1.11.4.js
+curl -sf --compressed http://www.appelsiini.net/download/jquery.jeditable.js > jquery.jeditable.js
 curl -sf --compressed https://raw.githubusercontent.com/eligrey/FileSaver.js/master/FileSaver.js > FileSaver.js
 curl -sf --compressed https://raw.githubusercontent.com/ArthurClemens/Javascript-Undo-Manager/master/lib/undomanager.js > undomanager.js
 curl -sf --compressed https://raw.githubusercontent.com/mholt/PapaParse/master/papaparse.js > papaparse.js

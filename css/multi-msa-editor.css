@@ -159,15 +159,26 @@ td.active {
 
 .flex-column {
     display: flex;
-    flex-flow: column
+    flex-flow: column;
 }
 
 tfoot input {
     width: 100%;
-    padding: 3px;
-    box-sizing: borer-box;
+    box-sizing: border-box;
 }
 
 #data_table_wrapper {
     padding-top: 10px;
+}
+
+#tsv_viewer {
+    display: inline-block;
+}
+
+table.dataTable tfoot td {
+    padding: 3px !important;
+}
+
+table.dataTable thead th {
+    padding: 5px 18px 5px 0 !important;
 }

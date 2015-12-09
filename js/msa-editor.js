@@ -29,6 +29,22 @@ function MSAFile () {
         }
         return false;
     };
+
+    this.computeUniqueRows = function() {
+        var seen = {};
+        for (var i = 0; i < this.rows.length; i++) {
+            var row = this.rows[i];
+            var word = row.alignment.join('').replace(/-/g, '');
+            if (word in seen) {
+                row.unique = false;
+                row.alignment = seen[word].alignment;
+                seen[word].equal_rows.push(row);
+            } else {
+                this.unique_rows.push(row);
+                seen[word] = row;
+            }
+        }
+    }
 }
 
 // utility function for MSARow and AnnotationRow
@@ -457,20 +473,8 @@ function parseMSA(msa_file, fileformat) {
     }
            
     //search duplicates
-    var seen = {};
-    for (var i = 0; i < msa_file.rows.length; i++) {
-        var row = msa_file.rows[i];
-        var word = row.alignment.join('').replace(/-/g, '');
-        if (word in seen) {
-            row.unique = false;
-            row.alignment = seen[word].alignment;
-            seen[word].equal_rows.push(row);
-        } else {
-            msa_file.unique_rows.push(row);
-            seen[word] = row;
-        }
-    }
-            
+    msa_file.computeUniqueRows();
+           
     var splice_args = [0,0];
     Array.prototype.push.apply(splice_args, msa_file.annotations);
     Array.prototype.splice.apply(msa_file.rows, splice_args);
@@ -558,9 +562,9 @@ function showMSA(msa_file, edit_mode) {
     msa_body.innerHTML = text;
     syncMsaToDom(msa_file);
 
-    $(document).off('keydown'); 
+    $('#msa_table').off('keydown'); 
     if (msa_file.status.mode === 'edit') {
-        $(document).keydown(tableSelection.keydownHandler);
+        $('#msa_table').keydown(tableSelection.keydownHandler);
         var td = document.querySelectorAll('TD');
         for (var i = 0; i < td.length; i++) {
             td[i].onmousedown  = tableSelection.mousedownHandler;

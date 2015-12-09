@@ -1,4 +1,7 @@
+var fileName = null;
 var dataFrame = null;
+var dataTable = null;
+var msaFile = null;
 var metaData = null;
 
 function openFile(files) {
@@ -7,13 +10,22 @@ function openFile(files) {
             var that = this;
             $('input', this.footer()).on('change', function () {
                 if (that.search() !== this.value) {
-                    that.search(this.value).draw();
+                    that.search(this.value, true, false).draw();
                 }
             } );
         } );
     };
 
-    var completeCallback = function(results, file) {
+    var datatableDrawCallback = function() {
+	$('#data_table tbody td').editable( function(new_value, settings) {
+            row = dataFrame[this._DT_CellIndex.row];
+            field_name = metaData.fields[this._DT_CellIndex.column];
+            row[field_name] = new_value;
+            return new_value;
+        });
+    }
+
+    var completeCallback = function(results) {
         dataFrame = results.data;
         metaData = results.meta;
 
@@ -28,12 +40,14 @@ function openFile(files) {
             alignment_selector.append('<option value="' + name + '">' + name + '</option>');
             columns.push({title: name, data: name});
         }
-        $('#data_table').DataTable( {
+        dataTable = $('#data_table').DataTable( {
             destroy: true,
             data: results.data,
             columns: columns,
-            initComplete: datatableInitComplete
+            initComplete: datatableInitComplete,
+            drawCallback: datatableDrawCallback
         });
+
         $('#tabs').tabs('option', 'disabled', []);
     };
 
@@ -41,6 +55,7 @@ function openFile(files) {
         alert('Error: File loading failed. Reason: ' + error);
     };
 
+    fileName = files[0].name;
     Papa.parse(files[0], {
         delimiter: '\t',
         header: true,
@@ -54,29 +69,49 @@ function openFile(files) {
 }
 
 function saveFile() {
-
+    var data = Papa.unparse(dataFrame, {
+        delimiter: '\t',
+        header: true,
+        fields:metaData.fields});
+    var blob = new Blob([data], {
+        type: "text/plain;charset=utf-8"
+    });
+    saveAs(blob, fileName);
 }
 
 function initEditor() {
     var data = $('#data_table').DataTable().rows({search: 'applied'}).data();
-    var msa_file = new MSAFile();
+    msaFile = new MSAFile();
 
     name_key = document.getElementById('name_col').value;
     alignment_key = document.getElementById('alignment_col').value;
-    msa_file.alignment_key = alignment_key;
+    msaFile.alignment_key = alignment_key;
     width = 0;
     for(var i=0; i<data.length; i++) {
         data_row = data[i];
         msa_row = new MSARow();
-        msa_file.unique_rows.push(msa_row);
+	msa_row.source = data_row;
+        msaFile.rows.push(msa_row);
         msa_row.row_header = data_row[name_key];
         msa_row.alignment = data_row[alignment_key].split(' ');
         width = Math.max(width, msa_row.alignment.length);
     }
-    msa_file.width = width;
-    
-    fileManager.setFiles([msa_file], 0);
-    showMSA(msa_file, true);
+    msaFile.width = width;
+    msaFile.computeUniqueRows();
+    normalizeMsa(msaFile, 'right');
+
+    fileManager.setFiles([msaFile], 0);
+    showMSA(msaFile, true);
+    document.getElementById('minimize').disabled = false;
+    document.getElementById('apply_changes').disabled = false;
+}
+
+function applyChanges() {
+    for (var i=0; i< msaFile.rows.length; i++) {
+        var row = msaFile.rows[i];
+	row.source[msaFile.alignment_key] = row.alignment.join(' ');
+    }
+    dataTable.rows().invalidate().draw();
 }
 
 function multiMSAEditorOnLoad() {
