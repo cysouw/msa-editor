@@ -17,10 +17,24 @@ function openFile(files) {
     };
 
     var datatableDrawCallback = function() {
-	$('#data_table tbody td').editable( function(new_value, settings) {
-            row = dataFrame[this._DT_CellIndex.row];
-            field_name = metaData.fields[this._DT_CellIndex.column];
-            row[field_name] = new_value;
+        $('#data_table tbody td').editable( function(new_value, settings) {
+            var data_row = dataFrame[this._DT_CellIndex.row];
+            var row = dataTable.row(this._DT_CellIndex.row)
+            var column = dataTable.column(this._DT_CellIndex.column);
+            var field_name = metaData.fields[this._DT_CellIndex.column];
+            data_row[field_name] = new_value;
+            dataTable.cell(this._DT_CellIndex).data(new_value);
+            //possibly reapply search
+            var search_term = column.search();
+            if (search_term !== '' && new_value.search(new RegExp(search_term, 'i')) === -1) {
+                //fire search again because new value doesn't match anymore
+                var table_row = row.node();
+                $(table_row).fadeTo(1000, 0.2);
+                window.setTimeout(function() {
+                    $(table_row).fadeIn({duration: 0});
+                    column.search(column.search(), true, false).draw();
+                }, 1000);
+            }
             return new_value;
         });
     }
