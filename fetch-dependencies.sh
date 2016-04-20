@@ -36,7 +36,7 @@ curl -sf --compressed http://www.appelsiini.net/download/jquery.jeditable.js > j
 curl -sf --compressed https://raw.githubusercontent.com/eligrey/FileSaver.js/master/FileSaver.js > FileSaver.js
 curl -sf --compressed https://raw.githubusercontent.com/ArthurClemens/Javascript-Undo-Manager/master/lib/undomanager.js > undomanager.js
 curl -sf --compressed https://raw.githubusercontent.com/mholt/PapaParse/master/papaparse.js > papaparse.js
-curl -sf --compressed https://www.datatables.net/download/builder?dt/dt-1.10.10,b-1.1.0,b-colvis-1.1.0 > DataTables.zip
+curl -sf --compressed https://www.datatables.net/download/builder?dt/dt-1.10.11,b-1.1.2,b-colvis-1.1.2 > DataTables.zip
 #unzip exits with code 1 in case of warnings like stripped leading slashes
 unzip -uq DataTables.zip || [ $? -eq 1 ]
 
