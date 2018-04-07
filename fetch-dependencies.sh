@@ -12,8 +12,8 @@ function finish {
 }
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-JSDESTDIR=$BASEDIR/js/lib
-CSSDESTDIR=$BASEDIR/css/lib
+JSDESTDIR=$BASEDIR/src/app/js/lib
+CSSDESTDIR=$BASEDIR/src/app/css/lib
 
 SUCCESS=0
 

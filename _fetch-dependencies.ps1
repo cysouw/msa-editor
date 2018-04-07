@@ -3,7 +3,7 @@ try {
 
 	$BaseDir = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 
-	$JsDir = Join-Path -Path $BaseDir -ChildPath "js\lib"
+	$JsDir = Join-Path -Path $BaseDir -ChildPath "src\app\js\lib"
 	New-Item $JsDir -type directory -force > $null
 	Remove-Item $JsDir\* -recurse
 
@@ -13,7 +13,7 @@ try {
 	$client.DownloadFile("https://raw.githubusercontent.com/ArthurClemens/Javascript-Undo-Manager/master/lib/undomanager.js", "$JsDir\undomanager.js" )
 
 
-	$CssDir =Join-Path -Path $BaseDir -ChildPath "css\lib"
+	$CssDir =Join-Path -Path $BaseDir -ChildPath "src\app\css\lib"
 	Remove-Item $CssDir\* -recurse
 	New-Item $CssDir -type directory -force > $null
 

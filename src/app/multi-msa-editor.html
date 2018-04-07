@@ -3,67 +3,71 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <link rel="stylesheet" href="css/lib/smoothness/jquery-ui.css" type="text/css">
-    <link rel="stylesheet" href="css/msa-editor.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="css/lib/jquery-ui/jquery-ui.css">
+    <link rel="stylesheet" type="text/css" href="js/lib/DataTables-1.10.11/css/dataTables.jqueryui.css"/>
+    <link rel="stylesheet" type="text/css" href="css/multi-msa-editor.css">
 
     <script type="text/javascript" src="js/lib/jquery-2.1.4.min.js"></script>
     <script type="text/javascript" src="js/lib/jquery-ui-1.11.4.js"></script>
+    <script type="text/javascript" src="js/lib/jquery.jeditable.js"></script>
     <script type="text/javascript" src="js/lib/FileSaver.js"></script>
     <script type="text/javascript" src="js/lib/undomanager.js"></script>
+    <script type="text/javascript" src="js/lib/papaparse.js"></script>
+    <script type="text/javascript" src="js/lib/DataTables-1.10.11/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" src="js/lib/DataTables-1.10.11/js/dataTables.jqueryui.js"></script>
     <script type="text/javascript" src="js/cell-style.js"></script>
     <script type="text/javascript" src="js/msa-editor.js"></script>
-    <script type="text/javascript" src="js/flat-format.js"></script>
-    <script type="text/javascript" src="js/nested-format.js"></script>
-  </head>
-  <body>
-  <h3>MSA Editor</h3>
-  <div style='overflow:hidden'>
-  <div style='float:left'>
-    <input type="file" id="file" name="file" multiple
-	onchange="fileManager.handleFiles(this.files)" class="submit2 active"/>
-    <select id="msa_select" style='display: none'
-	onchange="fileManager.handleFileSelect(this)"></select>
-    <label>File Format</label>
-    <select id="msa_file_format" onchange="fileManager.handleFileFormatSelect(this)">
-      <option value="nested">SPACE-Separated inside TABs</option>
-      <option value="flat">Flat with TABs</option>
-    </select>    
-    <input id="view" type="button"
-	onclick="fileManager.showSelectedFile(false)" class="submit inactive" value="View" />
-    <input id='edit' type="button" onclick="fileManager.showSelectedFile(true)"
-	class="submit inactive" value="Edit" />
-    <input id="reload" type="button"
-	onclick="fileManager.reload(true)" class="submit inactive"
-	value="Reload" />
-    <input id="minimize" type="button"
-	onclick="executeOperation(removeGapColumnsForActive)" class="submit inactive"
-	value="Minimize" />
-    <input id="save" type="button" onclick="fileManager.saveFiles()"
-	class="submit inactive" value="Save" />
-    <input id="undo_button" type="button" style='display: none'
-	onclick="undoManager.undo();" class="submit active"
-	value="Undo" />
-    <input id="redo_button" type="button" style='display: none'
-	onclick="undoManager.redo();" class="submit active"
-	value="Redo" />
-  </div>
+    <script type="text/javascript" src="js/multi-msa-editor.js"></script>
+</head>
 
-  <input type="button" value="Help" style='float:right' class="submit active"
-	onclick="showHelpWindow();"/>
-  </div>
-
-  <br><br>
-  <table id="msa_sticky_header_table" class='floating-header'>
-    <tbody id="msa_sticky_header_body"></tbody>
-  </table>
-  <table id="msa_table">
-    <thead id="msa_head"></thead>
-    <tbody id="msa_body"></tbody>
-  </table>
-
-  <div id="reload_dialog" title="Reload MSA file?" style='display: none'>
-    <p>There are unsaved changes to this file.<br>
-      Do you still want to reload the file?
+<body>
+  <div id="tabs">
+    <ul>
+      <li><a href="#tsv_viewer">TSV Viewer</a></li>
+      <li><a href="#editor_tab">Editor</a></li>
+    </ul>
+    <div id="tsv_viewer">
+      <div style='display:flex'>
+	<input type="file" id="file" name="file" onchange="openFile(this.files)" />
+	<input id="save" type="button" onclick="saveFile()" disabled value="Save" />
+      </div>
+      <table id="data_table">
+	<tfoot>
+	  <tr></tr>
+        </tfoot>
+	<tbody id="data_table_body"></tbody>
+      </table>
+    </div>
+    <div id="editor_tab">
+      <div class="flex-column" style="display: inline-block">
+	<div class="flex">
+          <label for="name_col" style="flex-grow: 1">Name Column</label>
+          <select id="name_col" name="name_col"></select>
+	</div>
+	<div class="flex">
+          <label for="alignment_col" style="flex-grow: 1">Alignment Column</label>
+          <select id="alignment_col" name="alignment_col"></select>
+	</div>
+      </div>
+      <div>
+        <button id="init_editor" type="button" onclick="initEditor()">Load from TSV</button>
+	<button id="apply_changes" type="button" onclick="applyChanges()" disabled>Apply changes to TSV</button>
+	<button id="minimize" type="button" onclick="executeOperation(removeGapColumnsForActive)" disabled>Minimize</button>
+	<button id="undo_button" type="button" onclick="undoManager.undo();" disabled>Undo</button>
+	<button id="redo_button" type="button" onclick="undoManager.redo();" disabled>Redo</button>
+	<button type="button" onclick="showHelpWindow();">Help</button>
+      </div>
+      <br>
+      <div id="msa-editor">
+        <table id="msa_sticky_header_table" class='floating-header'>
+	  <tbody id="msa_sticky_header_body"></tbody>
+        </table>
+        <table id="msa_table">
+	  <thead id="msa_head"></thead>
+	  <tbody id="msa_body"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div id="cell_edit_dialog" title="Edit Cell" style='display: none'>
@@ -187,11 +191,9 @@
 
       </tbody>
     </table>
-  </div>
-
-  <script>
-    window.onload = MSAEditorOnLoad;
-  </script>
-
-  </body>
+  </div>  
+<script>
+  window.onload = multiMSAEditorOnLoad;
+</script>
+</body>
 </html>
