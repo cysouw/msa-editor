@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <script type="text/javascript" src="js/app.js"></script>
+  </head>
+  <body>
+  <h3>MSA Editor</h3>
+  <div style='overflow:hidden'>
+  <div style='float:left'>
+    <input type="file" id="file" name="file" multiple
+	onchange="window.fileManager.handleFiles(this.files)" class="submit2 active"/>
+    <select id="msa_select" style='display: none'
+	onchange="window.fileManager.handleFileSelect(this)"></select>
+    <label>File Format</label>
+    <select id="msa_file_format" onchange="window.fileManager.handleFileFormatSelect(this)">
+      <option value="nested">SPACE-Separated inside TABs</option>
+      <option value="flat">Flat with TABs</option>
+    </select>    
+    <input id="view" type="button"
+	onclick="window.fileManager.showSelectedFile(false)" class="submit inactive" value="View" />
+    <input id='edit' type="button" onclick="window.fileManager.showSelectedFile(true)"
+	class="submit inactive" value="Edit" />
+    <input id="reload" type="button"
+	onclick="window.fileManager.reload(true)" class="submit inactive"
+	value="Reload" />
+    <input id="minimize" type="button"
+	onclick="executeOperation(removeGapColumnsForActive)" class="submit inactive"
+	value="Minimize" />
+    <input id="save" type="button" onclick="window.fileManager.saveFiles()"
+	class="submit inactive" value="Save" />
+    <input id="undo_button" type="button" style='display: none'
+	onclick="undoManager.undo();" class="submit active"
+	value="Undo" />
+    <input id="redo_button" type="button" style='display: none'
+	onclick="undoManager.redo();" class="submit active"
+	value="Redo" />
+  </div>
+
+  <input type="button" value="Help" style='float:right' class="submit active"
+	onclick="window.showHelpWindow();"/>
+  </div>
+
+  <br><br>
+  <table id="msa_sticky_header_table" class='floating-header'>
+    <tbody id="msa_sticky_header_body"></tbody>
+  </table>
+  <table id="msa_table">
+    <thead id="msa_head"></thead>
+    <tbody id="msa_body"></tbody>
+  </table>
+
+  <div id="reload_dialog" title="Reload MSA file?" style='display: none'>
+    <p>There are unsaved changes to this file.<br>
+      Do you still want to reload the file?
+  </div>
+
+  <div id="cell_edit_dialog" title="Edit Cell" style='display: none'>
+    <input type="text" name="cell_content" id="cell_content" class="text ui-widget-content ui-corner-all">
+  </div>
+
+  <div id="help_window" title="Help" style='display: none'>
+    <p>You can use the "Browse" button to select and load one or more MSA files
+      into the application. After that you can switch between different files
+      by using the provided drop down menu. The application has two modes: View
+      mode and Edit mode. View mode is the initial mode after loading or
+      selecting a new file and displays the alignment data contained in the
+      file. Edit mode removes duplicate entries with the same pronunciation and
+      enables the key and mouse bindings to change the alignment.
+    </p>
+    <h3>Edit mode</h3>
+    <p>The following tables use the following abbreviations for modifier keys,
+      which can be applied to change the executed commands:
+    </p>
+    <table class="helptable">
+      <tr><td>A</td><td>Alt key</td></tr>
+      <tr><td>C</td><td>Ctrl/Cmd key (labeled different on Win/Mac respectively)</td></tr>
+      <tr><td>S</td><td>Shift key</td></tr>
+    </table>
+    <h4>Mouse-Bindings</h4>
+
+    <table class="helptable">
+      <tbody>
+	<tr>
+	  <th>Key</th>
+	  <th>Effect</th>
+        </tr>
+	<tr>
+	  <td class="center">Click</td>
+	  <td>Start new selection</td>
+        </tr>
+	<tr>
+	  <td class="center">S-Click</td>
+	  <td>Extend current celection</td>
+        </tr>
+	<tr>
+	  <td class="center">DblClick</td>
+	  <td>Edit activated cell</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Key-Bindings</h4>
+    <table class="helptable">
+      <tbody>
+	<tr>
+	  <th>Key</th>
+	  <th>Effect</th>
+        </tr>
+	<tr>
+	  <td>v</td>
+	  <td>Switch to view mode</td>
+        </tr>
+	<tr>
+	  <td>u</td>
+	  <td>Undo</td>
+        </tr>
+	<tr>
+	  <td>r</td>
+	  <td>Redo</td>
+        </tr>
+	<tr>
+	  <td>s</td>
+	  <td>Save</td>
+        </tr>
+	<tr>
+	  <td>m</td>
+	  <td>Minimize</td>
+        </tr>
+	<tr>
+	  <td>e</td>
+	  <td>Edit activated cell</td>
+        </tr>
+	<tr>
+	  <td>&#8592;&#8593;&#8594;&#8595;</td>
+	  <td>Move selection start corner</td>
+        </tr>
+	<tr>
+	  <td>S-[&#8592;&#8593;&#8594;&#8595;]</td>
+	  <td>Extend selection</td>
+        </tr>
+	<tr>
+	  <td>C-[&#8592;&#8594;]</td>
+	  <td>Move selected cells</td>
+        </tr>
+	<tr>
+	  <td>C-[&#8593;&#8595;]</td>
+	  <td>Move selected rows up or down. When saving, comments in the
+	    original file other than at the start of the file won't be preserved.</td>
+        </tr>
+
+	<tr>
+	  <td>[Delete Backspace]</td>
+	  <td>Delete selected cells and fill the gap from right</td>
+        </tr>
+	<tr>
+	  <td>C-[Del Backspace]</td>
+	  <td>Delete selected cells and fill the gap from left</td>
+        </tr>
+	<tr>
+	  <td>Return</td>
+	  <td>Merge selected cells into one cell and fill the gap from right</td>
+        </tr>
+	<tr>
+	  <td>C - Return</td>
+	  <td>Merge selected cells into one cell and fill the gap from left</td>
+        </tr>
+	<tr>
+	  <td>S - Return</td>
+	  <td>Split selected cells into code points and extend to the right</td>
+        </tr>
+	<tr>
+	  <td>CS - Return</td>
+	  <td>Split selected cells into code points and extend to the left</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- <script>
+    window.onload = MSAEditorOnLoad;
+  </script> -->
+
+  </body>
+</html>
