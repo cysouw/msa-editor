@@ -1,0 +1,52 @@
+{
+  "name": "msa-editor",
+  "version": "1.0.0",
+  "description": "A HTML editor for MSA files containing phonetic alignments",
+  "main": "src/app/msa-editor.html",
+  "scripts": {
+    "build": "webpack --mode development",
+    "watch": "webpack --watch --mode=development --display-modules",
+    "production": "cross-env NODE_ENV=production webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cysouw/msa-editor.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cysouw/msa-editor/issues"
+  },
+  "homepage": "https://github.com/cysouw/msa-editor#readme",
+  "devDependencies": {
+    "autoprefixer": "^8.2.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-es2015": "^6.24.1",
+    "browser-sync": "^2.23.6",
+    "browser-sync-webpack-plugin": "^2.2.2",
+    "cross-env": "^5.1.4",
+    "css-loader": "^0.28.11",
+    "cssnano": "^3.10.0",
+    "datatables.net-buttons-jqui": "1.5.1",
+    "datatables.net-jqui": "1.10.16",
+    "eslint": "^4.19.1",
+    "file-saver": "1.3.8",
+    "jquery": "2.1.4",
+    "jquery-jeditable": "2.0.2",
+    "jquery-ui": "1.12.1",
+    "node-sass": "^4.8.3",
+    "optimize-css-assets-webpack-plugin": "^4.0.0",
+    "papaparse": "4.3.7",
+    "postcss-loader": "^2.1.3",
+    "sass-loader": "^6.0.7",
+    "style-loader": "^0.20.3",
+    "uglify-es": "^3.3.9",
+    "undo-manager": "1.0.5",
+    "url-loader": "^1.0.1",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14",
+    "webpack-uglifyes-plugin": "0.0.2"
+  },
+  "dependencies": {}
+}
