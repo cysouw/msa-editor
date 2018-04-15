@@ -4,20 +4,14 @@
 
 process.noDeprecation = true;
 
-const localServer = {
-  path: 'localhost/msa-editor.html',
-  port: 3000
-};
-
 const path = require('path');
 const webpack = require('webpack');
 const UglifyJSPlugin = require('webpack-uglifyes-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
 const config = {
   entry: {
-    app: './src/app/app.js'
+    app: './src/app/app.js',
+    'app-multi': './src/app/app-multi.js'
   },
   output: {
     filename: 'js/[name].js',
@@ -26,13 +20,16 @@ const config = {
   module: {
     rules: [
       {
-        test: /\.scss$/,
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+      },
+      { 
+        test: /\.(jpe?g|png|gif)$/i,
         use: [{
-          loader: "style-loader" // creates style nodes from JS strings
-        }, {
-            loader: "css-loader" // translates CSS into CommonJS
-        }, {
-            loader: "sass-loader" // compiles Sass to CSS
+          loader: 'file-loader',
+          options: {
+            outputPath: 'assets'
+          }
         }]
       },
       {
@@ -46,24 +43,6 @@ const config = {
     ]
   },
   plugins: [
-    // new ExtractTextPlugin('styles/[name].css'),
-    new BrowserSyncPlugin({
-      proxy: localServer.path,
-      port: localServer.port,
-      files: [],
-      ghostMode: {
-        clicks: false,
-        location: false,
-        forms: false,
-        scroll: false
-      },
-      injectChanges: true,
-      logFileChanges: true,
-      logLevel: 'debug',
-      logPrefix: 'wepback',
-      notify: true,
-      reloadDelay: 0
-    }),
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery'
@@ -73,8 +52,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'production') {
   config.plugins.push(
-    new UglifyJSPlugin(),
-    new OptimizeCssAssetsPlugin()
+    new UglifyJSPlugin()
   );
 }
 

@@ -1,6 +1,6 @@
 export var flatFormat = function() {
 
-  function splitLine(line, with_id) {
+  function splitLine(line) { //, with_id
     return line.split('\t');
   }
 

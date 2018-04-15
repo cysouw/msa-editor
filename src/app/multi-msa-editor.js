@@ -1,10 +1,21 @@
+import Papa from 'papaparse';
+import UndoManager from 'undo-manager';
+import { saveAs } from 'file-saver';
+
+import { updateTableHeaders } from './helpers';
+import { MSARow } from  './msa-row';
+import { MSAFile } from './msa-file';
+import { normalizeMsa, showMSA } from './helpers';
+import { fileManager } from './file-manager';
+import { tableSelection } from './table-selection';
+
 var fileName = null;
 var dataFrame = null;
 var dataTable = null;
 var msaFile = null;
 var metaData = null;
 
-function openFile(files) {
+export function openFile(files) {
   var datatableInitComplete = function () {
     this.api().columns().every( function () {
       var that = this;
@@ -16,8 +27,8 @@ function openFile(files) {
     } );
   };
 
-  var datatableDrawCallback = function() {
-    $('#data_table tbody td').editable( function(new_value, settings) {
+  var datatableDrawCallback = function () {
+    $('#data_table tbody td').editable(function(new_value) { //, settings
       var data_row = dataFrame[this._DT_CellIndex.row];
       var row = dataTable.row(this._DT_CellIndex.row)
       var column = dataTable.column(this._DT_CellIndex.column);
@@ -65,7 +76,7 @@ function openFile(files) {
     $('#tabs').tabs('option', 'disabled', []);
   };
 
-  var errorCallback = function(error, file) {
+  var errorCallback = function(error) { // , file
     alert('Error: File loading failed. Reason: ' + error);
   };
 
@@ -82,7 +93,7 @@ function openFile(files) {
   document.getElementById('save').disabled = false;
 }
 
-function saveFile() {
+export function saveFile() {
   var data = Papa.unparse(dataFrame, {
     delimiter: '\t',
     header: true,
@@ -93,18 +104,18 @@ function saveFile() {
   saveAs(blob, fileName);
 }
 
-function initEditor() {
+export function initEditor() {
   var data = $('#data_table').DataTable().rows({search: 'applied'}).data();
   msaFile = new MSAFile();
 
-  name_key = document.getElementById('name_col').value;
-  alignment_key = document.getElementById('alignment_col').value;
+  const name_key = document.getElementById('name_col').value;
+  const alignment_key = document.getElementById('alignment_col').value;
   msaFile.alignment_key = alignment_key;
-  width = 0;
-  for(var i=0; i<data.length; i++) {
-    data_row = data[i];
-    msa_row = new MSARow();
-	msa_row.source = data_row;
+  let width = 0;
+  for (var i=0; i<data.length; i++) {
+    const data_row = data[i];
+    const msa_row = new MSARow();
+    msa_row.source = data_row;
     msaFile.rows.push(msa_row);
     msa_row.row_header = data_row[name_key];
     msa_row.alignment = data_row[alignment_key].split(' ');
@@ -120,17 +131,17 @@ function initEditor() {
   document.getElementById('apply_changes').disabled = false;
 }
 
-function applyChanges() {
+export function applyChanges() {
   for (var i=0; i< msaFile.rows.length; i++) {
     var row = msaFile.rows[i];
-	row.source[msaFile.alignment_key] = row.alignment.join(' ');
+    row.source[msaFile.alignment_key] = row.alignment.join(' ');
   }
   dataTable.rows().invalidate().draw();
 }
 
-function multiMSAEditorOnLoad() {
-  undoManager = new UndoManager();
-  undoManager.setCallback(undoManagerChanged);
+export function multiMSAEditorOnLoad() {
+  window.undoManager = new UndoManager();
+  window.undoManager.setCallback(undoManagerChanged);
   undoManagerChanged();
 
   $( "#cell_edit_dialog" ).dialog({
@@ -139,6 +150,7 @@ function multiMSAEditorOnLoad() {
     buttons: {
       "Apply": function() {
         $( this ).dialog( "close" );
+        let cell_content;
         tableSelection.editActiveCell(this.event_target, cell_content.value);
 
       },
@@ -162,5 +174,11 @@ function multiMSAEditorOnLoad() {
 
   //tsv / editor tab
   $( "#tabs" ).tabs({disabled: [1]});
-};
+}
 
+function undoManagerChanged() {
+  var undo = document.getElementById('undo_button');
+  undo.disabled = !window.undoManager.hasUndo();
+  var redo = document.getElementById('redo_button');
+  redo.disabled = !window.undoManager.hasRedo();
+}
