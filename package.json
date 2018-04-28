@@ -2,11 +2,13 @@
   "name": "msa-editor",
   "version": "1.0.0",
   "description": "A HTML editor for MSA files containing phonetic alignments",
-  "main": "src/app/msa-editor.html",
+  "main": "main.js",
   "scripts": {
     "build": "npm dedupe && webpack --mode development",
-    "watch": "npm dedupe && webpack-dev-server --watch --mode=development --display-modules --content-base dist/",
-    "production": "npm dedupe && cross-env NODE_ENV=production webpack --mode production"
+    "watch": "npm dedupe && webpack-dev-server --watch --mode development --display-modules --content-base dist/",
+    "production": "npm dedupe && cross-env NODE_ENV=production webpack --mode production",
+    "watch:electron": "cross-env NODE_ENV=electron npm run watch",
+    "build:electron": "cross-env NODE_ENV=electron npm run build && electron-packager ."
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,8 @@
     "css-loader": "^0.28.11",
     "datatables.net-buttons-jqui": "1.5.1",
     "datatables.net-jqui": "1.10.16",
+    "electron": "^1.8.6",
+    "electron-packager": "^12.0.1",
     "eslint": "^4.19.1",
     "file-loader": "^1.1.11",
     "file-saver": "1.3.8",

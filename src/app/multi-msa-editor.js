@@ -8,8 +8,10 @@ import { MSAFile } from './msa-file';
 import { normalizeMsa, showMSA } from './helpers';
 import { fileManager } from './file-manager';
 import { tableSelection } from './table-selection';
+import * as fs from 'fs';
 
 var fileName = null;
+var filePath = null;
 var dataFrame = null;
 var dataTable = null;
 var msaFile = null;
@@ -81,6 +83,7 @@ export function openFile(files) {
   };
 
   fileName = files[0].name;
+  filePath = files[0].path;
   Papa.parse(files[0], {
     delimiter: '\t',
     header: true,
@@ -98,10 +101,19 @@ export function saveFile() {
     delimiter: '\t',
     header: true,
     fields:metaData.fields});
-  var blob = new Blob([data], {
-    type: "text/plain;charset=utf-8"
-  });
-  saveAs(blob, fileName);
+  if (typeof fs.writeFile === 'function') {
+    fs.writeFile(filePath, data, function(err) {
+      if (err) {
+        return alert('There was an error writing the file: ', err);
+      }
+      return alert('File saved.');
+    });
+  } else {
+    var blob = new Blob([data], {
+      type: "text/plain;charset=utf-8"
+    });
+    saveAs(blob, fileName);
+  }
 }
 
 export function initEditor() {
