@@ -21,8 +21,36 @@ function createWindow () {
     protocol: 'file:',
     slashes: true
   }))
-  // mainWindow.loadURL('http://localhost:8080/msa-editor.html')
 
+  var template = [
+    {
+      label: 'MSA Editor',
+      submenu: [
+        {
+          label: 'Simple',
+          click: function () {
+            mainWindow.loadURL(url.format({
+              pathname: path.join(__dirname, 'dist', 'msa-editor.html'),
+              protocol: 'file:',
+              slashes: true
+            }))
+          }
+        },
+        {
+          label: 'Multi',
+          click: function () {
+            mainWindow.loadURL(url.format({
+              pathname: path.join(__dirname, 'dist', 'multi-msa-editor.html'),
+              protocol: 'file:',
+              slashes: true
+            }))
+          }
+        }
+      ]
+    }
+  ];
+  var menu = electron.Menu.buildFromTemplate(template);
+  electron.Menu.setApplicationMenu(menu);
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 
