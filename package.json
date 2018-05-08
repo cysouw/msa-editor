@@ -7,8 +7,8 @@
     "build": "npm dedupe && webpack --mode development",
     "watch": "npm dedupe && webpack-dev-server --watch --mode development --display-modules --content-base dist/",
     "production": "npm dedupe && cross-env NODE_ENV=production webpack --mode production",
-    "build:electron": "cross-env NODE_ENV=electron npm run production && electron-packager .",
-    "build:electron:mac": "cross-env NODE_ENV=electron npm run production && electron-packager . --platform darwin --arch x64"
+    "build:electron": "npm dedupe && cross-env NODE_ENV=electron webpack --mode production && electron-packager .",
+    "build:electron:mac": "npm dedupe && cross-env NODE_ENV=electron webpack --mode production && electron-packager . --platform darwin --arch x64"
   },
   "repository": {
     "type": "git",
