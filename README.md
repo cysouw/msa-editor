@@ -1,8 +1,8 @@
 # MSA Editor
 
-A HTML editor for MSA files containing phonetic alignments.
+A HTML editor for multiple alignment files containing (phonetic) alignments.
 
-This is an HTML application to modify existing MSA files without requiring a
+This is an HTML application to modify existing multiple alignment files without requiring a
 Web server. You can simply open `dist/msa-editor.html` in a browser and edit MSA
 files on your hard disk.
 
@@ -29,11 +29,3 @@ To build the production version:
 
 We target modern browsers on desktop operating systems, where *modern* means
 the current stable version of the major browsers, or the version before that.
-
-### Safari
-
-The Safari browser doesn't support the HTML5 FileApi to the same extent as the
-other browsers. When you press "SAVE" the file will open in a new Tab instead
-of directly opening a file dialog. Additionally, the text shown may be
-garbled; make sure to choose 'UTF-8' as default character encoding when you
-want to check the generated file directly in the browser window.
