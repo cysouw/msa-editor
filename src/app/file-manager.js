@@ -5,6 +5,7 @@ import { parseMSA, showMSA, executeOperation, removeGapColumns,
   removeGapColumnsForActive } from './helpers';
 import { flatFormat } from './flat-format';
 import { nestedFormat } from './nested-format';
+import * as fs from 'fs';
 
 export var fileManager = (function () {
   var fileFormat = null;
@@ -57,10 +58,19 @@ export var fileManager = (function () {
       }
     }
 
-    var blob = new Blob([data], {
-      type: "text/plain;charset=utf-8"
-    });
-    window.saveAs(blob, msa_file.filename);
+    if (typeof fs.writeFile === 'function') {
+      fs.writeFile(msa_file.filepath, data, function(err) {
+        if (err) {
+          return alert('There was an error writing the file: ', err);
+        }
+        return alert('File saved.');
+      });
+    } else {
+      const blob = new Blob([data], {
+        type: "text/plain;charset=utf-8"
+      });
+      window.saveAs(blob, msa_file.filename);
+    }
   }
 
   return {
@@ -88,6 +98,7 @@ export var fileManager = (function () {
         var handle = fileHandles[i];
         var msa = new MSAFile();
         msa.filename = handle.name;
+        msa.filepath = handle.path;
 
         //prepare callback for read completion
         var reader = new FileReader();

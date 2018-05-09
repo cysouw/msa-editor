@@ -25,6 +25,10 @@ To build the production version:
 
   $ npm run production
 
+To build the electron app for your local platform:
+
+  $ npm run build:electron
+
 ## Compatibility notes
 
 We target modern browsers on desktop operating systems, where *modern* means
