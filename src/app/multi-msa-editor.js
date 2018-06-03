@@ -17,6 +17,19 @@ var dataTable = null;
 var msaFile = null;
 var metaData = null;
 
+export function openFileFromPath(path) {
+  fs.readFile(path, function(err, data) {
+    if (!err) {
+      const fileObj = new Blob([data], {
+        type: "text/plain;charset=utf-8"
+      });
+      fileObj.path = path;
+      fileObj.name = path.replace(/^.*[\\\/]/, '');
+      openFile([ fileObj ]);
+    }
+  });
+}
+
 export function openFile(files) {
   var datatableInitComplete = function () {
     this.api().columns().every( function () {
@@ -93,7 +106,10 @@ export function openFile(files) {
     error: errorCallback
   });
   
-  document.getElementById('save').disabled = false;
+  const saveButton = document.getElementById('save');
+  if (saveButton) {
+    saveButton.disabled = false;
+  }
 }
 
 export function saveFile() {

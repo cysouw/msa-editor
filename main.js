@@ -6,6 +6,7 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+const { dialog } = require('electron')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -17,35 +18,34 @@ function createWindow () {
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'dist', 'msa-editor.html'),
+    pathname: path.join(__dirname, 'dist', 'multi-msa-editor-electron.html'),
     protocol: 'file:',
     slashes: true
   }))
 
   var template = [
     {
-      label: 'MSA Editor',
+      label: 'Datei',
       submenu: [
         {
-          label: 'Simple',
+          label: 'Open File...',
           click: function () {
-            mainWindow.loadURL(url.format({
-              pathname: path.join(__dirname, 'dist', 'msa-editor.html'),
-              protocol: 'file:',
-              slashes: true
-            }))
+            dialog.showOpenDialog({properties: ['openFile']}, files => {
+              if (files && files.length > 0) {
+                mainWindow.webContents.executeJavaScript(
+                  `window.openFileFromPath(${JSON.stringify(files[0])})`);
+              }
+            });
           }
         },
         {
-          label: 'Multi',
+          label: 'Save File',
           click: function () {
-            mainWindow.loadURL(url.format({
-              pathname: path.join(__dirname, 'dist', 'multi-msa-editor.html'),
-              protocol: 'file:',
-              slashes: true
-            }))
+            mainWindow.webContents.executeJavaScript('window.saveFile()');
           }
-        }
+        },
+        {type: 'separator'},
+        {role: 'quit'}
       ]
     }
   ];
