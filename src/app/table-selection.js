@@ -288,6 +288,8 @@ export var tableSelection = (function () {
     editActiveCell: function(cell, new_value) {
       let position = getPositionInTable(cell);
       if (position === undefined) return;
+      cell = getCellInTable(position.x, position.y);
+      cell.innerHTML = new_value;
       var msa_file = fileManager.activeFile();
       if (msa_file === null) return;
       executeOperation(function(msa_file) { // , selection

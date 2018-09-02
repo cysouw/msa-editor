@@ -1,13 +1,18 @@
 import { AnnotationRow } from './annotation-row';
 import { MSARow } from './msa-row';
 import { MSAFile } from './msa-file';
-import { parseMSA, showMSA, executeOperation, removeGapColumns,
-  removeGapColumnsForActive } from './helpers';
+import {
+  parseMSA,
+  showMSA,
+  executeOperation,
+  removeGapColumns,
+  removeGapColumnsForActive
+} from './helpers';
 import { flatFormat } from './flat-format';
 import { nestedFormat } from './nested-format';
 import * as fs from 'fs';
 
-export var fileManager = (function () {
+export var fileManager = (function() {
   var fileFormat = null;
   var fileHandles = null;
   var MSAFiles = null;
@@ -16,8 +21,14 @@ export var fileManager = (function () {
 
   function setEditMode(new_mode) {
     edit_mode = new_mode;
-    document.getElementById('undo_button').style.display = (new_mode && 'inline' || 'none');
-    document.getElementById('redo_button').style.display = (new_mode && 'inline' || 'none');
+    if (document.getElementById('undo_button')) {
+      document.getElementById('undo_button').style.display =
+        (new_mode && 'inline') || 'none';
+    }
+    if (document.getElementById('redo_button')) {
+      document.getElementById('redo_button').style.display =
+        (new_mode && 'inline') || 'none';
+    }
   }
 
   function exportFile(msa_file) {
@@ -29,30 +40,32 @@ export var fileManager = (function () {
 
     if (msa_file.orderChanged()) {
       //reordered file, export only initial comments, annotation and alignment rows
-      for (let i=0; i < msa_file.lines.length; i++) {
+      for (let i = 0; i < msa_file.lines.length; i++) {
         let line = msa_file.lines[i];
         if (!(typeof line === 'string' || line instanceof String)) {
           break;
         }
         data += line;
       }
-      for (let i=0; i < msa_file.unique_rows.length; i++) {
+      for (let i = 0; i < msa_file.unique_rows.length; i++) {
         var row = msa_file.unique_rows[i];
         data += row.exportRow(msa_file, fileFormat.secondary_separator);
         if (row instanceof MSARow) {
-          for (var j=0; j < row.equal_rows.length; j++) {
-            data += row.equal_rows[j].exportRow(msa_file, fileFormat.secondary_separator);
+          for (var j = 0; j < row.equal_rows.length; j++) {
+            data += row.equal_rows[j].exportRow(
+              msa_file,
+              fileFormat.secondary_separator
+            );
           }
         }
       }
     } else {
       //export file as close as possible to the original
-      for(let i = 0; i < msa_file.lines.length; i++) {
+      for (let i = 0; i < msa_file.lines.length; i++) {
         let line = msa_file.lines[i];
         if (line instanceof MSARow || line instanceof AnnotationRow) {
           data += line.exportRow(msa_file, fileFormat.secondary_separator);
-        }
-        else {
+        } else {
           data += line;
         }
       }
@@ -67,19 +80,21 @@ export var fileManager = (function () {
       });
     } else {
       const blob = new Blob([data], {
-        type: "text/plain;charset=utf-8"
+        type: 'text/plain;charset=utf-8'
       });
       window.saveAs(blob, msa_file.filename);
     }
   }
 
   return {
-    setFiles: function(files) { // _active_idx
+    setFiles: function(files) {
+      // _active_idx
       MSAFiles = files;
       active_idx = 0;
     },
 
-    handleFiles: function (_fileHandles) { //user selected new set of files
+    handleFiles: function(_fileHandles) {
+      //user selected new set of files
       fileHandles = _fileHandles;
       //clear drop down list
       var elem = document.getElementById('msa_select');
@@ -89,7 +104,7 @@ export var fileManager = (function () {
       active_idx = -1;
       MSAFiles = [];
       var get_onload_callback = function(msa_obj, index) {
-        return function (event) {
+        return function(event) {
           fileManager.fileLoaded(event, msa_obj, index);
         };
       };
@@ -110,48 +125,59 @@ export var fileManager = (function () {
     reload: function(do_ask) {
       if (fileHandles === null || active_idx === undefined) return;
       if (do_ask && MSAFiles[active_idx].status.edited) {
-        $("#reload_dialog").dialog("open");
+        $('#reload_dialog').dialog('open');
         return;
       }
       var handle = fileHandles[active_idx];
       var msa = new MSAFile();
       var reader = new FileReader();
       msa.filename = handle.name;
-      reader.onload = function (msa, MSAFiles, active_idx) {
-        return function (event) {
+      reader.onload = (function(msa, MSAFiles, active_idx) {
+        return function(event) {
           msa.filecontent = event.target.result;
           MSAFiles[active_idx] = msa;
           var elem = document.getElementById('msa_select');
           elem.onchange(elem);
         };
-      }(msa, MSAFiles, active_idx);
+      })(msa, MSAFiles, active_idx);
       reader.onerror = function(event) {
         var error = event.target.error;
         if (error.name !== undefined) {
-          alert("Reloading failed with the following error code: " + error.name);
-        } else if (window.FileError !== undefined && error instanceof FileError) {
+          alert(
+            'Reloading failed with the following error code: ' + error.name
+          );
+        } else if (
+          window.FileError !== undefined &&
+          error instanceof FileError
+        ) {
           //Safari
           if (error.code == FileError.NOT_FOUND_ERR) {
-            alert("Reloading failed with error code NOT_FOUND_ERR. The Reload feature is known not to " +
-               "work in Safari if you change the file outside the Browser before reloading. " +
-               "In this case, please use another browser.");
+            alert(
+              'Reloading failed with error code NOT_FOUND_ERR. The Reload feature is known not to ' +
+                'work in Safari if you change the file outside the Browser before reloading. ' +
+                'In this case, please use another browser.'
+            );
           } else {
             let code_to_name = {};
-            for(var name in FileError) {
-              if (name.endsWith("ERR")) {
+            for (var name in FileError) {
+              if (name.endsWith('ERR')) {
                 code_to_name[FileError[name]] = name;
               }
             }
-            alert("Reloading failed with the following error code: " + code_to_name[error.code] + '.');
+            alert(
+              'Reloading failed with the following error code: ' +
+                code_to_name[error.code] +
+                '.'
+            );
           }
         } else {
-          alert("Reloading failed with an unexpected error: " + error);
+          alert('Reloading failed with an unexpected error: ' + error);
         }
       };
       reader.readAsText(handle);
     },
 
-    handleFileSelect: function (event) {
+    handleFileSelect: function(event) {
       //user selects a msa file from drop down list
       var selected_idx = parseInt(event.value);
       active_idx = selected_idx;
@@ -168,7 +194,7 @@ export var fileManager = (function () {
       } else if (event.value == 'flat') {
         fileFormat = flatFormat;
       } else {
-        alert("Unknown file format");
+        alert('Unknown file format');
         fileFormat = null;
       }
     },
@@ -190,11 +216,11 @@ export var fileManager = (function () {
       option.innerHTML = msa_obj.filename;
       elem.appendChild(option);
       elem.style.display = 'inline';
-      document.getElementById('view').className = "submit active";
-      document.getElementById('edit').className = "submit active";
-      document.getElementById('reload').className = "submit active";
-      document.getElementById('save').className = "submit active";
-      document.getElementById('minimize').className = "submit active";
+      document.getElementById('view').className = 'submit active';
+      document.getElementById('edit').className = 'submit active';
+      document.getElementById('reload').className = 'submit active';
+      document.getElementById('save').className = 'submit active';
+      document.getElementById('minimize').className = 'submit active';
       if (active_idx === -1) {
         elem.value = index;
         elem.onchange(elem);
@@ -206,10 +232,13 @@ export var fileManager = (function () {
         return;
       }
       var count = 0;
-      for (var i=0; i<MSAFiles.length; i++) {
-        if (MSAFiles[i].status.edited || fileFormat !== MSAFiles[i].original_fileformat) {
+      for (var i = 0; i < MSAFiles.length; i++) {
+        if (
+          MSAFiles[i].status.edited ||
+          fileFormat !== MSAFiles[i].original_fileformat
+        ) {
           if (i === active_idx) {
-            if (edit_mode){
+            if (edit_mode) {
               executeOperation(removeGapColumnsForActive);
             } else {
               removeGapColumns(MSAFiles[i]);
@@ -223,7 +252,7 @@ export var fileManager = (function () {
         }
       }
       if (count === 0) {
-        alert("No modified files found.");
+        alert('No modified files found.');
       }
     },
 
@@ -231,7 +260,7 @@ export var fileManager = (function () {
       if (MSAFiles === null) {
         return null;
       }
-      return MSAFiles[active_idx]; 
+      return MSAFiles[active_idx];
     }
   };
 })();
