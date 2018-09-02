@@ -14,10 +14,6 @@
       <li><a href="#editor_tab">Editor</a></li>
     </ul>
     <div id="tsv_viewer">
-      <div style='display:flex'>
-        <input type="file" id="file" name="file" onchange="window.openFile(this.files)" />
-        <input id="save" type="button" onclick="window.saveFile()" disabled value="Save" />
-      </div>
       <table id="data_table" style="width: 100%">
         <tfoot>
           <tr></tr>
@@ -35,14 +31,6 @@
           <label for="alignment_col" style="flex-grow: 1">Alignment Column</label>
           <select id="alignment_col" name="alignment_col"></select>
         </div>
-      </div>
-      <div>
-        <button id="init_editor" type="button" onclick="window.initEditor()">Load from TSV</button>
-        <button id="apply_changes" type="button" onclick="window.applyChanges()" disabled>Apply changes to TSV</button>
-        <button id="minimize" type="button" onclick="window.executeOperation(window.removeGapColumnsForActive)" disabled>Minimize</button>
-        <button id="undo_button" type="button" onclick="window.undoManager.undo();" disabled>Undo</button>
-        <button id="redo_button" type="button" onclick="window.undoManager.redo();" disabled>Redo</button>
-        <button type="button" onclick="window.showHelpWindow();">Help</button>
       </div>
       <br>
       <div id="msa-editor">

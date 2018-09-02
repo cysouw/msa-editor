@@ -7,11 +7,14 @@ import { tableSelection } from './table-selection';
 
 function undoManagerChanged() {
   var undo = document.getElementById('undo_button');
-  undo.disabled = !window.undoManager.hasUndo();
+  if (undo) {
+    undo.disabled = !window.undoManager.hasUndo();
+  }
   var redo = document.getElementById('redo_button');
-  redo.disabled = !window.undoManager.hasRedo();
+  if (redo) {
+    redo.disabled = !window.undoManager.hasRedo();
+  }
 }
-
 
 /*
  * (generic) helper functions
@@ -35,21 +38,19 @@ function undoManagerChanged() {
 
 function checkDependencies() {
   var result = '';
-  if (UndoManager === undefined)
-    result += 'Loading of UndoManager failed.\n';
-  if (window.saveAs === undefined)
-    result += 'Loading of FileSaver failed.\n';
-  if (window.jQuery === undefined)
-    result += 'Loading of JQuery failed.\n';
+  if (UndoManager === undefined) result += 'Loading of UndoManager failed.\n';
+  if (window.saveAs === undefined) result += 'Loading of FileSaver failed.\n';
+  if (window.jQuery === undefined) result += 'Loading of JQuery failed.\n';
   else if (window.jQuery.ui === undefined)
     result += 'Loading of JQueryUI failed.\n';
   if (result !== '')
-    result += '\nThe application will not work as intended. Did you run fetch-dependencies.sh?' ;
+    result +=
+      '\nThe application will not work as intended. Did you run fetch-dependencies.sh?';
   return result;
 }
 
 export function showHelpWindow() {
-  $("#help_window").dialog("open");
+  $('#help_window').dialog('open');
 }
 
 //initialisation
@@ -69,39 +70,43 @@ export function MSAEditorOnLoad() {
   document.getElementById('msa_file_format').dispatchEvent(event);
 
   //prepare dialogs
-  $("#reload_dialog").dialog({
+  $('#reload_dialog').dialog({
     autoOpen: false,
     modal: true,
     width: 400,
-    position: { my: "center top", at: "center bottom", of: $("#reload"), collision: "fit" },
-    buttons : {
-      "Proceed" : function() {
+    position: {
+      my: 'center top',
+      at: 'center bottom',
+      of: $('#reload'),
+      collision: 'fit'
+    },
+    buttons: {
+      Proceed: function() {
         fileManager.reload(false);
-        $(this).dialog("close");
+        $(this).dialog('close');
       },
-      "Cancel" : function() {
-        $(this).dialog("close");
+      Cancel: function() {
+        $(this).dialog('close');
       }
     }
   });
 
-  $( "#cell_edit_dialog" ).dialog({
+  $('#cell_edit_dialog').dialog({
     autoOpen: false,
     modal: true,
     buttons: {
-      "Apply": function() {
-        $( this ).dialog( "close" );
+      Apply: function() {
+        $(this).dialog('close');
         let cell_content;
         tableSelection.editActiveCell(this.event_target, cell_content.value);
-
       },
       Cancel: function() {
-        $( this ).dialog( "close" );
+        $(this).dialog('close');
       }
-    },
+    }
   });
 
-  $( "#help_window" ).dialog({
+  $('#help_window').dialog({
     autoOpen: false,
     modal: true,
     width: '80ex',
@@ -111,5 +116,5 @@ export function MSAEditorOnLoad() {
   //sticky table header
   $(window)
     .scroll(updateTableHeaders)
-    .trigger("scroll");
+    .trigger('scroll');
 }
